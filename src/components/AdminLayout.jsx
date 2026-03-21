@@ -41,6 +41,7 @@ export function AdminLayout() {
         ],
       },
       { label: 'Pendidikan', path: '/admin/pendidikan', icon: GraduationCap },
+      { label: 'Media', path: '/admin/media', icon: Image },
     ] : []),
 
     ...(isSuperAdmin || isAdmin || isEditor ? [

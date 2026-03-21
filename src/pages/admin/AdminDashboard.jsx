@@ -25,6 +25,7 @@ export function AdminDashboard() {
     { label: 'Pendidikan', desc: 'Program belajar', icon: GraduationCap, path: '/admin/pendidikan', color: 'text-emerald-600 bg-emerald-50' },
     { label: 'Pojok Santri', desc: 'Kelola artikel', icon: BookOpen, path: '/admin/pojok-santri', color: 'text-amber-600 bg-amber-50' },
     { label: 'Pengumuman', desc: 'Update info', icon: Megaphone, path: '/admin/pengumuman', color: 'text-purple-600 bg-purple-50' },
+    { label: 'Media', desc: 'Folder uploads', icon: Image, path: '/admin/media', color: 'text-cyan-600 bg-cyan-50' },
     { label: 'Pendaftaran', desc: 'Info PSB', icon: ClipboardList, path: '/admin/pendaftaran', color: 'text-rose-600 bg-rose-50' },
   ];
 
