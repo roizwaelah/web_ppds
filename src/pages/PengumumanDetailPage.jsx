@@ -207,23 +207,21 @@ export function PengumumanDetailPage() {
 
   return (
     <PublicLayout seo={seo}>
-      <div className="bg-emerald-800 text-white py-12">
+      <div className="bg-emerald-800 text-white py-8">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Link to="/pengumuman" className="inline-flex items-center gap-1 text-emerald-200 hover:text-white text-sm mb-6">
+          <Link to="/pengumuman" className="inline-flex items-center gap-1 text-emerald-200 hover:text-white text-sm mb-2">
             <ArrowLeft size={16} /> Kembali ke Pengumuman
           </Link>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
             <div className="lg:col-span-8">
-              <div className="flex flex-wrap items-center gap-2 mb-3">
-                {item.important && (
-                  <span className="text-xs font-semibold text-red-300 bg-red-500/30 px-2.5 py-0.5 rounded-full">Penting</span>
-                )}
-              </div>
-              <h1 className="text-2xl md:text-4xl font-bold leading-tight mb-4">{item.title}</h1>
+              <h1 className="text-2xl md:text-4xl font-bold leading-tight mb-2">{item.title}</h1>
               <div className="flex items-center gap-2 text-emerald-200 text-sm">
                 <Calendar size={14} />
                 {formattedDate}
+                {item.important && (
+                  <span className="text-xs font-semibold text-red-300 bg-red-500/30 px-2.5 py-0.5 rounded-full">Penting</span>
+                )}
               </div>
             </div>
 

@@ -38,16 +38,16 @@ export function PendaftaranPage() {
     <PublicLayout>
       <div className="font-sans">
         {/* Hero Section */}
-        <section className="bg-linear-to-br from-emerald-900 via-emerald-800 to-emerald-900 py-10 text-white relative overflow-hidden">
+        <section className="bg-linear-to-br from-emerald-900 via-emerald-900 to-emerald-900 py-8 text-white relative overflow-hidden">
           <div className="absolute inset-0 opacity-10 pointer-events-none">
             <div className="absolute top-0 left-0 w-64 h-64 bg-white rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl"></div>
           </div>
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-            <span className="inline-block px-4 py-1.5 bg-emerald-700/50 backdrop-blur-md rounded-full text-xs font-black uppercase tracking-[0.2em] mb-6 border border-emerald-500/30">
+            <span className="inline-block px-4 py-1.5 bg-emerald-700/50 backdrop-blur-md rounded-full text-xl font-black uppercase tracking-[0.2em] mb-4 border border-emerald-500/30">
               Penerimaan Santri Baru (PSB)
             </span>
-            <p className="text-emerald-400 max-w-2xl mx-auto font-medium leading-relaxed">
+            <p className="text-emerald-300 max-w-2xl mx-auto font-medium leading-relaxed">
               Pondok Pesantren Darussalam Panusupan membuka pintu bagi calon santri yang
               ingin menimba ilmu agama dan pengetahuan umum secara seimbang.
             </p>
