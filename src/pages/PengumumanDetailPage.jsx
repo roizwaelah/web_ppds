@@ -1,11 +1,13 @@
-import { useParams, Link } from 'react-router-dom';
+import { useLocation, useParams, Link } from 'react-router-dom';
 import { PublicLayout } from '../components/PublicLayout';
 import { useData } from '../contexts/DataContext';
 import { ArrowLeft, Calendar } from 'lucide-react';
 import { PublicRichTextRenderer } from '../components/ui/PublicRichTextRenderer';
+import { createAnnouncementSeo } from '../utils/seo';
 
 export function PengumumanDetailPage() {
   const { id } = useParams();
+  const location = useLocation();
   const { pengumuman } = useData();
 
   if (!pengumuman) {
@@ -31,8 +33,10 @@ export function PengumumanDetailPage() {
     );
   }
 
+  const seo = createAnnouncementSeo(item, location.pathname);
+
   return (
-    <PublicLayout>
+    <PublicLayout seo={seo}>
       <div className="bg-emerald-800 text-white py-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <Link to="/pengumuman" className="inline-flex items-center gap-1 text-emerald-200 hover:text-white text-sm mb-6">

@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useLocation, useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Calendar, User, Clock3, Link2, Check } from 'lucide-react';
 import { PublicLayout } from '../components/PublicLayout';
 import { useData } from '../contexts/DataContext';
 import { PublicRichTextRenderer } from '../components/ui/PublicRichTextRenderer';
 import { stripHTML } from '../utils/text';
+import { createArticleSeo } from '../utils/seo';
 
 const FALLBACK_IMAGE = 'https://placehold.co/1200x675?text=Pojok+Santri';
 
@@ -40,6 +41,7 @@ function estimateReadTime(content = '') {
 
 export function PojokSantriDetailPage() {
   const { id } = useParams();
+  const location = useLocation();
   const { pojokSantri } = useData();
   const [copied, setCopied] = useState(false);
 
@@ -89,8 +91,10 @@ export function PojokSantriDetailPage() {
     );
   }
 
+  const seo = createArticleSeo(article, location.pathname);
+
   return (
-    <PublicLayout>
+    <PublicLayout seo={seo}>
       <section className="border-b border-slate-200 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
           <Link to="/pojok-santri" className="inline-flex items-center gap-1 text-sm text-emerald-700 hover:text-emerald-800 font-semibold">
