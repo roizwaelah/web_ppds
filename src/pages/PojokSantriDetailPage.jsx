@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useLocation, useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Calendar, User, Clock3, Link2, Check } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Clock3, Link2, Check, MessageCircle, Download } from 'lucide-react';
 import { PublicLayout } from '../components/PublicLayout';
 import { useData } from '../contexts/DataContext';
 import { PublicRichTextRenderer } from '../components/ui/PublicRichTextRenderer';
@@ -67,6 +67,55 @@ export function PojokSantriDetailPage() {
       setTimeout(() => setCopied(false), 1800);
     } catch {
       setCopied(false);
+    }
+  };
+
+  const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
+  const whatsappShareUrl = `https://wa.me/?text=${encodeURIComponent(`Baca artikel ${article?.title || ''} di ${shareUrl}`)}`;
+
+  const handleDownloadPdf = () => {
+    if (typeof window === 'undefined') return;
+
+    const printWindow = window.open('', '_blank', 'noopener,noreferrer,width=960,height=720');
+    if (!printWindow) return;
+
+    const printableContent = `<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>${article?.title || 'Artikel Pojok Santri'}</title>
+    <style>
+      body { font-family: Arial, sans-serif; padding: 32px; color: #0f172a; line-height: 1.7; }
+      img { max-width: 100%; height: auto; border-radius: 12px; margin-bottom: 24px; }
+      h1 { font-size: 32px; margin-bottom: 8px; }
+      .meta { color: #475569; font-size: 14px; margin-bottom: 24px; }
+      .content { font-size: 16px; }
+      .content a { color: #047857; }
+    </style>
+  </head>
+  <body>
+    <h1>${article?.title || ''}</h1>
+    <div class="meta">${article?.author || 'Tim Redaksi'} • ${formatDate(article?.date || article?.created_at)}</div>
+    ${article?.image ? `<img src="${toSafeImage(article.image)}" alt="${article.title || ''}" />` : ''}
+    <div class="content">${article?.content || ''}</div>
+  </body>
+</html>`;
+
+    printWindow.document.open();
+    printWindow.document.write(printableContent);
+    printWindow.document.close();
+    printWindow.focus();
+
+    const triggerPrint = () => {
+      printWindow.print();
+      printWindow.close();
+    };
+
+    if (printWindow.document.readyState === 'complete') {
+      triggerPrint();
+    } else {
+      printWindow.onload = triggerPrint;
     }
   };
 
@@ -138,15 +187,34 @@ export function PojokSantriDetailPage() {
           <div className="lg:sticky lg:top-24 space-y-5">
             <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
               <div className="px-4 py-3 bg-emerald-700 text-white">
-                <h3 className="text-sm font-bold uppercase tracking-wider">Bagikan</h3>
+                <h3 className="text-sm font-bold uppercase tracking-wider flex justify-center">Bagikan</h3>
               </div>
-              <div className="p-4">
+              <div className="p-4 flex items-center justify-center gap-3">
+                <a
+                  href={whatsappShareUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="Bagikan ke WhatsApp"
+                  title="Bagikan ke WhatsApp"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-md bg-[#25D366] text-white hover:bg-[#1fb85a] transition-colors"
+                >
+                  <MessageCircle size={18} />
+                </a>
+                <button
+                  onClick={handleDownloadPdf}
+                  aria-label="Download PDF"
+                  title="Download PDF"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-md border border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 transition-colors"
+                >
+                  <Download size={18} />
+                </button>
                 <button
                   onClick={copyLink}
-                  className="w-full inline-flex items-center justify-center gap-2 rounded-md border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                  aria-label={copied ? 'Link disalin' : 'Salin link artikel'}
+                  title={copied ? 'Link disalin' : 'Salin link artikel'}
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors"
                 >
-                  {copied ? <Check size={16} /> : <Link2 size={16} />}
-                  {copied ? 'Link disalin' : 'Salin link artikel'}
+                  {copied ? <Check size={18} /> : <Link2 size={18} />}
                 </button>
               </div>
             </div>
