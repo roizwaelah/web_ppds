@@ -35,11 +35,7 @@ function rateLimit($max = 100, $window = 60)
 
 function sanitizeUrl($url)
 {
-    if (!$url) return null;
-    if (filter_var($url, FILTER_VALIDATE_URL)) {
-        return $url;
-    }
-    return null;
+    return sanitizeUrlOrUploadPath($url, false);
 }
 
 switch ($method) {

@@ -73,3 +73,22 @@ function safeJsonDecode($value, $fallback = [])
     $decoded = json_decode($value, true);
     return (json_last_error() === JSON_ERROR_NONE) ? $decoded : $fallback;
 }
+
+function sanitizeUrlOrUploadPath($url, $allowEmpty = true)
+{
+    $url = trim((string)$url);
+
+    if ($url === '') {
+        return $allowEmpty ? '' : null;
+    }
+
+    if (preg_match('#^/uploads/[A-Za-z0-9._%\\-/]+$#', $url) === 1) {
+        return $url;
+    }
+
+    if (filter_var($url, FILTER_VALIDATE_URL)) {
+        return $url;
+    }
+
+    return $allowEmpty ? '' : null;
+}

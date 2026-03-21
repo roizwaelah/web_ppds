@@ -35,7 +35,7 @@ function sanitizeContent($html)
 
 function sanitizeUrl($url)
 {
-    return filter_var($url, FILTER_VALIDATE_URL) ? $url : '';
+    return sanitizeUrlOrUploadPath($url);
 }
 
 switch ($method) {
