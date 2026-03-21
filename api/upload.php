@@ -6,11 +6,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     jsonError('Method not allowed', 405);
 }
 
-$user = requireAuth();
-
-if (!in_array($user['role'], ['admin', 'superadmin'])) {
-    jsonError('Forbidden', 403);
-}
+$user = requireRoleLevel(1);
 
 if (!isset($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
     jsonError('File tidak valid', 400);

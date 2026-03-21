@@ -2,15 +2,16 @@
 require_once __DIR__ . '/helpers.php';
 require_once __DIR__ . '/jwt.php';
 
-$user = requireAdmin();
 $uploadDir = dirname(__DIR__) . '/uploads';
 $uploadBase = '/uploads/';
 $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
 
 if (!is_dir($uploadDir)) {
     if ($method === 'GET') {
+        requireRoleLevel(1);
         jsonResponse([]);
     }
+    requireAdmin();
     jsonError('Folder uploads tidak ditemukan', 404);
 }
 
@@ -63,10 +64,12 @@ function listUploadMedia($uploadDir, $uploadBase)
 }
 
 if ($method === 'GET') {
+    requireRoleLevel(1);
     jsonResponse(listUploadMedia($uploadDir, $uploadBase));
 }
 
 if ($method === 'DELETE') {
+    $user = requireAdmin();
     $payload = getJsonInput();
     $filename = normalizeUploadFilename($payload['filename'] ?? '');
     $target = $uploadDir . DIRECTORY_SEPARATOR . $filename;
