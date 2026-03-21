@@ -1,33 +1,3 @@
-# PPDS Project
-
-Project ini siap di-upload ke GitHub dan bisa didevelop dari perangkat mana saja.
-
-## List yang di-upload ke GitHub
-
-Upload file/folder berikut:
-
-- `src/`
-- `index.html`
-- `vite.config.js`
-- `package.json`
-- `package-lock.json`
-- `favicon.png`
-- `logo.png`
-- `header_ppds.png`
-- `CSRF.txt` (jika memang dipakai sebagai dokumentasi, bukan secret)
-- `.gitignore`
-- `.env.example`
-- `LICENSE`
-- `README.md`
-
-## List yang jangan di-upload
-
-- `node_modules/`
-- `dist/`
-- `.env`
-- `.env.local`
-- file secret lain (API key, password, token)
-
 ## Setup di perangkat lain
 
 1. Clone repo:
