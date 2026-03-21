@@ -1,8 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useLocation, useParams, Link } from 'react-router-dom';
 import { PublicLayout } from '../components/PublicLayout';
 import { useData } from '../contexts/DataContext';
-import { ArrowLeft, Calendar, Check, Download, Link2, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Calendar, Check, Link2, MessageCircle } from 'lucide-react';
 import { PublicRichTextRenderer } from '../components/ui/PublicRichTextRenderer';
 import { createAnnouncementSeo } from '../utils/seo';
 
@@ -169,7 +169,6 @@ export function PengumumanDetailPage() {
   const location = useLocation();
   const { pengumuman } = useData();
   const [copied, setCopied] = useState(false);
-  const [isDownloading, setIsDownloading] = useState(false);
 
   if (!pengumuman) {
     return (
@@ -198,35 +197,12 @@ export function PengumumanDetailPage() {
   const pageUrl = typeof window !== 'undefined' ? window.location.href : `https://ppds.local${location.pathname}`;
   const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`Pengumuman PPDS: ${item.title}\n${pageUrl}`)}`;
   const formattedDate = new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-  const pdfContent = useMemo(() => stripHtml(item.content), [item.content]);
 
   const copyLink = async () => {
     if (typeof navigator === 'undefined' || !navigator.clipboard) return;
     await navigator.clipboard.writeText(pageUrl);
     setCopied(true);
     window.setTimeout(() => setCopied(false), 2000);
-  };
-
-  const downloadPdf = () => {
-    setIsDownloading(true);
-    try {
-      const blob = buildPdfBlob({
-        title: item.title,
-        date: formattedDate,
-        content: pdfContent,
-      });
-      const fileName = `${item.title.toLowerCase().replace(/[^a-z0-9]+/gi, '-').replace(/(^-|-$)/g, '') || 'pengumuman'}.pdf`;
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
-    } finally {
-      setIsDownloading(false);
-    }
   };
 
   return (
@@ -251,35 +227,26 @@ export function PengumumanDetailPage() {
               </div>
             </div>
 
-            <aside className="lg:col-span-4 w-full">
-              <div className="rounded-2xl border border-white/15 bg-white/10 backdrop-blur-sm p-4 sm:p-5">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-emerald-100 mb-4">Bagikan</h3>
-                <div className="space-y-3">
-                  <a
-                    href={whatsappUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-full inline-flex items-center justify-center gap-2 rounded-md bg-[#25D366] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#1fba57] transition-colors"
-                  >
-                    <MessageCircle size={16} />
-                    Bagikan ke WhatsApp
-                  </a>
-                  <button
-                    onClick={downloadPdf}
-                    disabled={isDownloading}
-                    className="w-full inline-flex items-center justify-center gap-2 rounded-md border border-emerald-200/30 bg-white/90 px-4 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-white transition-colors disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    <Download size={16} />
-                    {isDownloading ? 'Menyiapkan PDF...' : 'Download PDF'}
-                  </button>
-                  <button
-                    onClick={copyLink}
-                    className="w-full inline-flex items-center justify-center gap-2 rounded-md border border-white/20 bg-transparent px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/10 transition-colors"
-                  >
-                    {copied ? <Check size={16} /> : <Link2 size={16} />}
-                    {copied ? 'Link disalin' : 'Salin link pengumuman'}
-                  </button>
-                </div>
+            <aside className="lg:col-span-4 w-full lg:flex lg:justify-end">
+              <div className="inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/10 px-3 py-2 backdrop-blur-sm">
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="Bagikan ke WhatsApp"
+                  title="Bagikan ke WhatsApp"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#25D366] text-white transition-colors hover:bg-[#1fba57]"
+                >
+                  <MessageCircle size={18} />
+                </a>
+                <button
+                  onClick={copyLink}
+                  aria-label={copied ? 'Link disalin' : 'Salin link pengumuman'}
+                  title={copied ? 'Link disalin' : 'Salin link pengumuman'}
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-transparent text-white transition-colors hover:bg-white/10"
+                >
+                  {copied ? <Check size={18} /> : <Link2 size={18} />}
+                </button>
               </div>
             </aside>
           </div>
