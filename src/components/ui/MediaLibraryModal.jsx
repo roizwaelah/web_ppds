@@ -132,7 +132,7 @@ export function MediaLibraryModal({ isOpen, onClose, onSelect, selectedUrl = '' 
 
   return (
     <Portal>
-      <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 sm:p-6">
+      <div className="fixed inset-0 z-90 flex items-center justify-center p-4 sm:p-6">
         <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" onClick={onClose} />
         <div className="relative z-10 w-full max-w-6xl rounded-3xl bg-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
           <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-slate-200">
@@ -204,7 +204,7 @@ export function MediaLibraryModal({ isOpen, onClose, onSelect, selectedUrl = '' 
                 <p className="text-xs text-slate-500 mt-1">Upload gambar baru atau ubah kata kunci pencarian.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-4">
                 {filteredItems.map((item) => {
                   const isSelected = item.url === selectedUrl;
 
@@ -213,7 +213,7 @@ export function MediaLibraryModal({ isOpen, onClose, onSelect, selectedUrl = '' 
                       key={item.name}
                       className={`rounded-3xl overflow-hidden border bg-white shadow-sm transition-all ${isSelected ? 'border-emerald-500 ring-2 ring-emerald-100' : 'border-slate-200 hover:border-emerald-200'}`}
                     >
-                      <div className="relative aspect-[4/3] bg-slate-100 group overflow-hidden">
+                      <div className="relative aspect-4/3 bg-slate-100 group overflow-hidden">
                         <img src={item.url} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                         <div className="absolute inset-x-0 top-0 flex justify-between items-start p-3">
                           {isSelected ? (
@@ -258,10 +258,10 @@ export function MediaLibraryModal({ isOpen, onClose, onSelect, selectedUrl = '' 
                             onSelect?.(item.url);
                             onClose?.();
                           }}
-                          className={`w-full inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-bold transition-all ${isSelected ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-900 text-white hover:bg-slate-800'}`}
+                          className={`w-full inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-2.5 text-[11px] font-bold transition-all ${isSelected ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-900 text-white hover:bg-slate-800'}`}
                         >
                           <ImageIcon size={14} />
-                          {isSelected ? 'Sedang Dipakai' : 'Pakai Gambar Ini'}
+                          {isSelected ? 'Sedang Dipakai' : 'Pakai Gambar'}
                         </button>
                       </div>
                     </div>
