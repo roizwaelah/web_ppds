@@ -3,6 +3,8 @@ import { Copy, FolderOpen, Image as ImageIcon, Loader2, RefreshCw, Search, Trash
 import { deleteMediaApi, getMediaLibrary, uploadMediaApi } from '../../lib/api';
 import { useNotification } from '../../contexts/NotificationContext';
 import { ConfirmDialog } from '../../components/ui/Dialog';
+import { useAuth } from '../../contexts/AuthContext';
+import { getAdminAccess } from '../../lib/adminAccess';
 
 const acceptedTypes = 'image/jpeg,image/png,image/gif,image/webp,image/svg+xml';
 
@@ -21,6 +23,7 @@ function formatDate(value) {
 }
 
 export function AdminMedia() {
+  const { user } = useAuth();
   const { showToast } = useNotification();
   const [mediaItems, setMediaItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,6 +31,7 @@ export function AdminMedia() {
   const [search, setSearch] = useState('');
   const [deleteTarget, setDeleteTarget] = useState(null);
   const fileInputRef = useRef(null);
+  const access = getAdminAccess(user?.level);
 
   const loadMedia = async ({ silent = false } = {}) => {
     if (!silent) setLoading(true);
@@ -199,15 +203,17 @@ export function AdminMedia() {
                   >
                     <Copy size={15} />
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setDeleteTarget(item)}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-red-500 shadow-lg transition hover:bg-white hover:text-red-600"
-                    aria-label={`Hapus ${item.name}`}
-                    title="Hapus gambar"
-                  >
-                    <Trash2 size={15} />
-                  </button>
+                  {access.canManageMedia && (
+                    <button
+                      type="button"
+                      onClick={() => setDeleteTarget(item)}
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-red-500 shadow-lg transition hover:bg-white hover:text-red-600"
+                      aria-label={`Hapus ${item.name}`}
+                      title="Hapus gambar"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  )}
                 </div>
               </div>
 
