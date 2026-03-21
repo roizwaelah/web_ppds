@@ -14,6 +14,7 @@ export function getAdminAccess(level = 0) {
     canAccessPendidikan: normalizedLevel >= 5,
     canAccessPojokSantri: normalizedLevel >= 1,
     canAccessPengumuman: normalizedLevel >= 1,
+    canAccessKomentar: normalizedLevel >= 1,
     canAccessPendaftaran: normalizedLevel >= 5,
     canAccessUsers: normalizedLevel >= 10,
   };
