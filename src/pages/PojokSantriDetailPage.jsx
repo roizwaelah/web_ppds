@@ -199,9 +199,9 @@ export function PojokSantriDetailPage() {
           <div className="lg:sticky lg:top-24 space-y-5">
             <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
               <div className="px-4 py-3 bg-emerald-700 text-white">
-                <h3 className="text-sm font-bold uppercase tracking-wider">Bagikan</h3>
+                <h3 className="text-sm font-bold uppercase tracking-wider flex justify-center">Bagikan</h3>
               </div>
-              <div className="p-4 flex items-center gap-3">
+              <div className="p-4 flex items-center justify-center gap-3">
                 <a
                   href={whatsappShareUrl}
                   target="_blank"
