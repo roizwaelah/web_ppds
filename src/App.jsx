@@ -28,6 +28,7 @@ import { AdminPojokSantri } from './pages/admin/AdminPojokSantri';
 import { AdminPengumuman } from './pages/admin/AdminPengumuman';
 import { AdminPendaftaran } from './pages/admin/AdminPendaftaran';
 import { AdminUsers } from './pages/admin/AdminUsers';
+import { AdminMedia } from './pages/admin/AdminMedia';
 import { Forbidden } from './pages/admin/Forbidden';
 
 // 1. Tambahkan RequireGuest untuk memproteksi halaman login
@@ -112,6 +113,14 @@ export function App() {
                 <Route path="pojok-santri" element={<AdminPojokSantri />} />
                 <Route path="pengumuman" element={<AdminPengumuman />} />
                 <Route path="pendaftaran" element={<AdminPendaftaran />} />
+                <Route
+                  path="media"
+                  element={
+                    <RequireLevel minLevel={5}>
+                      <AdminMedia />
+                    </RequireLevel>
+                  }
+                />
                 <Route path="/admin/forbidden" element={<Forbidden />} />
                 {/* 3. Ganti Route Users dengan RequireLevel (Min Level 5 untuk Admin) */}
                 <Route 
