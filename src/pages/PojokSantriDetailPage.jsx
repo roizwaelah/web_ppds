@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useLocation, useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Calendar, User, Clock3, Link2, Check } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Clock3, Link2, Check, Download } from 'lucide-react';
 import { PublicLayout } from '../components/PublicLayout';
 import { useData } from '../contexts/DataContext';
 import { PublicRichTextRenderer } from '../components/ui/PublicRichTextRenderer';
@@ -39,6 +39,15 @@ function estimateReadTime(content = '') {
   return `${minutes} menit baca`;
 }
 
+function WhatsAppIcon(props) {
+  return (
+    <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true" {...props}>
+      <path d="M19.11 17.21c-.27-.13-1.6-.79-1.85-.88-.25-.09-.43-.13-.61.13-.18.27-.7.88-.86 1.06-.16.18-.31.2-.58.07-.27-.13-1.13-.42-2.15-1.33-.8-.71-1.34-1.59-1.5-1.86-.16-.27-.02-.41.11-.54.12-.12.27-.31.4-.47.13-.16.18-.27.27-.45.09-.18.04-.34-.02-.47-.07-.13-.61-1.48-.84-2.03-.22-.53-.44-.46-.61-.47l-.52-.01c-.18 0-.47.07-.72.34-.25.27-.95.93-.95 2.27 0 1.34.98 2.64 1.11 2.82.13.18 1.91 2.92 4.62 4.1.64.28 1.14.45 1.53.58.64.2 1.22.17 1.68.1.51-.08 1.6-.65 1.82-1.28.22-.62.22-1.16.16-1.28-.07-.12-.25-.2-.52-.33Z" />
+      <path d="M16.01 3.2c-7.07 0-12.8 5.73-12.8 12.8 0 2.25.58 4.37 1.6 6.22L3.2 28.8l6.76-1.57a12.75 12.75 0 0 0 6.05 1.53h.01c7.07 0 12.8-5.73 12.8-12.8 0-3.43-1.34-6.65-3.77-9.08A12.7 12.7 0 0 0 16.01 3.2Zm0 23.4h-.01c-1.89 0-3.74-.51-5.36-1.47l-.38-.23-4.01.93.96-3.91-.25-.4a10.58 10.58 0 0 1-1.63-5.63c0-5.87 4.78-10.65 10.66-10.65 2.84 0 5.5 1.1 7.51 3.11a10.54 10.54 0 0 1 3.12 7.53c0 5.88-4.78 10.66-10.65 10.66Z" />
+    </svg>
+  );
+}
+
 export function PojokSantriDetailPage() {
   const { id } = useParams();
   const location = useLocation();
@@ -68,6 +77,58 @@ export function PojokSantriDetailPage() {
     } catch {
       setCopied(false);
     }
+  };
+
+  const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
+  const whatsappShareUrl = `https://wa.me/?text=${encodeURIComponent(`Baca artikel ${article?.title || ''} di ${shareUrl}`)}`;
+
+  const handleDownloadPdf = () => {
+    if (typeof window === 'undefined') return;
+
+    const printableContent = `<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>${article?.title || 'Artikel Pojok Santri'}</title>
+    <style>
+      body { font-family: Arial, sans-serif; padding: 32px; color: #0f172a; line-height: 1.7; }
+      img { display: block; max-width: 100%; height: auto; border-radius: 12px; margin: 0 0 24px; }
+      h1 { font-size: 32px; margin-bottom: 8px; }
+      .meta { color: #475569; font-size: 14px; margin-bottom: 24px; }
+      .content { font-size: 16px; }
+      .content a { color: #047857; }
+    </style>
+  </head>
+  <body>
+    <h1>${article?.title || ''}</h1>
+    <div class="meta">${article?.author || 'Tim Redaksi'} • ${formatDate(article?.date || article?.created_at)}</div>
+    ${article?.image ? `<img src="${toSafeImage(article.image)}" alt="${article.title || ''}" />` : ''}
+    <div class="content">${article?.content || ''}</div>
+    <script>
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          window.focus();
+          window.print();
+        }, 300);
+      });
+      window.addEventListener('afterprint', () => window.close());
+    <\/script>
+  </body>
+</html>`;
+
+    const htmlBlob = new Blob([printableContent], { type: 'text/html' });
+    const htmlUrl = URL.createObjectURL(htmlBlob);
+    const printWindow = window.open(htmlUrl, '_blank');
+
+    if (!printWindow) {
+      URL.revokeObjectURL(htmlUrl);
+      return;
+    }
+
+    const revokeUrl = () => URL.revokeObjectURL(htmlUrl);
+    printWindow.addEventListener('load', revokeUrl, { once: true });
+    setTimeout(revokeUrl, 60000);
   };
 
   if (!pojokSantri) {
@@ -140,13 +201,32 @@ export function PojokSantriDetailPage() {
               <div className="px-4 py-3 bg-emerald-700 text-white">
                 <h3 className="text-sm font-bold uppercase tracking-wider">Bagikan</h3>
               </div>
-              <div className="p-4">
+              <div className="p-4 flex items-center gap-3">
+                <a
+                  href={whatsappShareUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="Bagikan ke WhatsApp"
+                  title="Bagikan ke WhatsApp"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-md bg-[#25D366] text-white hover:bg-[#1fb85a] transition-colors"
+                >
+                  <WhatsAppIcon className="h-[18px] w-[18px]" />
+                </a>
+                <button
+                  onClick={handleDownloadPdf}
+                  aria-label="Download PDF"
+                  title="Download PDF"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-md border border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 transition-colors"
+                >
+                  <Download size={18} />
+                </button>
                 <button
                   onClick={copyLink}
-                  className="w-full inline-flex items-center justify-center gap-2 rounded-md border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                  aria-label={copied ? 'Link disalin' : 'Salin link artikel'}
+                  title={copied ? 'Link disalin' : 'Salin link artikel'}
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors"
                 >
-                  {copied ? <Check size={16} /> : <Link2 size={16} />}
-                  {copied ? 'Link disalin' : 'Salin link artikel'}
+                  {copied ? <Check size={18} /> : <Link2 size={18} />}
                 </button>
               </div>
             </div>
