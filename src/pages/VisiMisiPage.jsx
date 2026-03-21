@@ -20,7 +20,7 @@ export function VisiMisiPage() {
 
   return (
     <PublicLayout>
-      <div className="bg-emerald-800 text-white py-16">
+      <div className="bg-emerald-800 text-white py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-3xl md:text-4xl font-bold mb-3">Visi & Misi</h1>
           <p className="text-emerald-200">Arah dan tujuan Pondok Pesantren Darussalam</p>
@@ -29,7 +29,7 @@ export function VisiMisiPage() {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
         {/* Visi */}
-        <div className="bg-gradient-to-br from-emerald-600 to-teal-600 rounded-2xl p-8 md:p-12 text-white mb-12">
+        <div className="bg-linear-to-br from-emerald-600 to-teal-600 rounded-2xl p-8 md:p-12 text-white mb-12">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-3 bg-white/20 rounded-xl">
               <Eye size={28} />
