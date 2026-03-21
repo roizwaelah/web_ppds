@@ -29,6 +29,11 @@ export function AdminLayout() {
   const sidebarItems = [
     ...(isSuperAdmin || isAdmin ? [
       { label: 'Dashboard', path: '/admin', icon: LayoutDashboard },
+    ] : []),
+    ...(isSuperAdmin || isAdmin || isEditor ? [
+      { label: 'Media', path: '/admin/media', icon: Image },
+    ] : []),
+    ...(isSuperAdmin || isAdmin ? [
       { label: 'Hero Slide', path: '/admin/hero-slides', icon: Image },
       {
         label: 'Profil Pondok',
@@ -41,7 +46,6 @@ export function AdminLayout() {
         ],
       },
       { label: 'Pendidikan', path: '/admin/pendidikan', icon: GraduationCap },
-      { label: 'Media', path: '/admin/media', icon: Image },
     ] : []),
 
     ...(isSuperAdmin || isAdmin || isEditor ? [
