@@ -20,6 +20,7 @@ import {
   Building2,
   Shield,
   Globe,
+  MessageSquare,
 } from "lucide-react";
 
 export function AdminLayout() {
@@ -83,6 +84,9 @@ export function AdminLayout() {
       : []),
     ...(access.canAccessPengumuman
       ? [{ label: "Pengumuman", path: "/admin/pengumuman", icon: Megaphone }]
+      : []),
+    ...(access.canAccessKomentar
+      ? [{ label: "Komentar", path: "/admin/komentar", icon: MessageSquare }]
       : []),
 
     ...(access.canAccessPendaftaran

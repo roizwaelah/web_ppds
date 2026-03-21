@@ -29,6 +29,7 @@ import { AdminPengumuman } from './pages/admin/AdminPengumuman';
 import { AdminPendaftaran } from './pages/admin/AdminPendaftaran';
 import { AdminUsers } from './pages/admin/AdminUsers';
 import { AdminMedia } from './pages/admin/AdminMedia';
+import { AdminKomentar } from './pages/admin/AdminKomentar';
 import { Forbidden } from './pages/admin/Forbidden';
 
 // 1. Tambahkan RequireGuest untuk memproteksi halaman login
@@ -158,6 +159,14 @@ export function App() {
                   element={
                     <RequireLevel minLevel={1}>
                       <AdminPengumuman />
+                    </RequireLevel>
+                  }
+                />
+                <Route
+                  path="komentar"
+                  element={
+                    <RequireLevel minLevel={1}>
+                      <AdminKomentar />
                     </RequireLevel>
                   }
                 />

@@ -1,11 +1,12 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Calendar, User, Clock3, Link2, Check, Download } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Clock3, Link2, Check, MessageCircle, Download, Send, MessagesSquare } from 'lucide-react';
 import { PublicLayout } from '../components/PublicLayout';
 import { useData } from '../contexts/DataContext';
 import { PublicRichTextRenderer } from '../components/ui/PublicRichTextRenderer';
 import { stripHTML } from '../utils/text';
 import { createArticleSeo } from '../utils/seo';
+import { createPojokSantriComment, getPojokSantriComments } from '../lib/api';
 
 const FALLBACK_IMAGE = 'https://placehold.co/1200x675?text=Pojok+Santri';
 
@@ -33,6 +34,18 @@ function formatDate(value) {
   });
 }
 
+function formatDateTime(value) {
+  const date = value ? new Date(value) : null;
+  if (!date || Number.isNaN(date.getTime())) return '-';
+  return date.toLocaleString('id-ID', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
 function estimateReadTime(content = '') {
   const words = stripHTML(content).trim().split(/\s+/).filter(Boolean).length;
   const minutes = Math.max(1, Math.ceil(words / 200));
@@ -53,6 +66,12 @@ export function PojokSantriDetailPage() {
   const location = useLocation();
   const { pojokSantri } = useData();
   const [copied, setCopied] = useState(false);
+  const [comments, setComments] = useState([]);
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const [commentError, setCommentError] = useState('');
+  const [submittingComment, setSubmittingComment] = useState(false);
+  const [commentSuccess, setCommentSuccess] = useState('');
+  const [commentForm, setCommentForm] = useState({ name: '', email: '', comment: '' });
 
   const publishedList = useMemo(() => {
     const list = Array.isArray(pojokSantri) ? pojokSantri : [];
@@ -68,6 +87,31 @@ export function PojokSantriDetailPage() {
     () => publishedList.filter((item) => String(item.id) !== String(id)).slice(0, 6),
     [publishedList, id]
   );
+
+  useEffect(() => {
+    let active = true;
+
+    const loadComments = async () => {
+      if (!id) return;
+      try {
+        setCommentsLoading(true);
+        setCommentError('');
+        const response = await getPojokSantriComments({ articleId: id, status: 'approved', limit: 100 });
+        if (!active) return;
+        setComments(Array.isArray(response?.data) ? response.data : []);
+      } catch (error) {
+        if (!active) return;
+        setCommentError(error.message || 'Gagal memuat komentar');
+      } finally {
+        if (active) setCommentsLoading(false);
+      }
+    };
+
+    loadComments();
+    return () => {
+      active = false;
+    };
+  }, [id]);
 
   const copyLink = async () => {
     try {
@@ -131,6 +175,28 @@ export function PojokSantriDetailPage() {
     setTimeout(revokeUrl, 60000);
   };
 
+  const handleCommentSubmit = async (event) => {
+    event.preventDefault();
+    setCommentSuccess('');
+    setCommentError('');
+
+    try {
+      setSubmittingComment(true);
+      await createPojokSantriComment({
+        articleId: Number(id),
+        name: commentForm.name,
+        email: commentForm.email,
+        comment: commentForm.comment,
+      });
+      setCommentForm({ name: '', email: '', comment: '' });
+      setCommentSuccess('Komentar berhasil dikirim dan akan tampil setelah disetujui admin.');
+    } catch (error) {
+      setCommentError(error.message || 'Gagal mengirim komentar');
+    } finally {
+      setSubmittingComment(false);
+    }
+  };
+
   if (!pojokSantri) {
     return (
       <PublicLayout>
@@ -176,24 +242,119 @@ export function PojokSantriDetailPage() {
       </section>
 
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <article className="lg:col-span-8">
-          <div className="rounded-xl overflow-hidden border border-slate-200 bg-white">
-            <img
-              src={toSafeImage(article.image)}
-              alt={article.title}
-              onError={(e) => {
-                e.currentTarget.onerror = null;
-                e.currentTarget.src = FALLBACK_IMAGE;
-              }}
-              className="w-full h-56 sm:h-72 md:h-[420px] object-cover"
-            />
-            <div className="p-5 md:p-8">
-              <div className="max-w-none prose prose-slate prose-lg prose-headings:font-black prose-a:text-emerald-700 hover:prose-a:text-emerald-800 prose-img:rounded-lg">
-                <PublicRichTextRenderer content={article.content} />
+        <div className="lg:col-span-8 space-y-8">
+          <article>
+            <div className="rounded-xl overflow-hidden border border-slate-200 bg-white">
+              <img
+                src={toSafeImage(article.image)}
+                alt={article.title}
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = FALLBACK_IMAGE;
+                }}
+                className="w-full h-56 sm:h-72 md:h-[420px] object-cover"
+              />
+              <div className="p-5 md:p-8">
+                <div className="max-w-none prose prose-slate prose-lg prose-headings:font-black prose-a:text-emerald-700 hover:prose-a:text-emerald-800 prose-img:rounded-lg">
+                  <PublicRichTextRenderer content={article.content} />
+                </div>
               </div>
             </div>
-          </div>
-        </article>
+          </article>
+
+          <section className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-200 bg-slate-50 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-emerald-700">Diskusi</p>
+                <h2 className="mt-1 text-xl font-black text-slate-900 flex items-center gap-2">
+                  <MessagesSquare className="text-emerald-600" size={20} />
+                  Komentar ({comments.length})
+                </h2>
+              </div>
+              <p className="text-xs text-slate-500 max-w-sm">Komentar baru akan tampil setelah melalui moderasi admin untuk menjaga diskusi tetap sehat.</p>
+            </div>
+
+            <div className="p-5 md:p-6 space-y-6">
+              <form onSubmit={handleCommentSubmit} className="rounded-2xl border border-slate-200 bg-slate-50 p-4 md:p-5 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Nama *</label>
+                    <input
+                      type="text"
+                      value={commentForm.name}
+                      onChange={(e) => setCommentForm((prev) => ({ ...prev, name: e.target.value }))}
+                      className="w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                      placeholder="Nama Anda"
+                      maxLength={120}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Email</label>
+                    <input
+                      type="email"
+                      value={commentForm.email}
+                      onChange={(e) => setCommentForm((prev) => ({ ...prev, email: e.target.value }))}
+                      className="w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                      placeholder="email@contoh.com"
+                      maxLength={190}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Komentar *</label>
+                  <textarea
+                    value={commentForm.comment}
+                    onChange={(e) => setCommentForm((prev) => ({ ...prev, comment: e.target.value }))}
+                    className="w-full min-h-32 rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                    placeholder="Tulis tanggapan atau pertanyaan Anda terkait artikel ini"
+                    maxLength={1500}
+                    required
+                  />
+                  <p className="mt-1 text-xs text-slate-500 text-right">{commentForm.comment.length}/1500</p>
+                </div>
+
+                {commentSuccess && <div className="rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm text-emerald-700">{commentSuccess}</div>}
+                {commentError && <div className="rounded-xl bg-rose-50 border border-rose-200 px-4 py-3 text-sm text-rose-700">{commentError}</div>}
+
+                <div className="flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={submittingComment}
+                    className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    <Send size={16} /> {submittingComment ? 'Mengirim...' : 'Kirim Komentar'}
+                  </button>
+                </div>
+              </form>
+
+              <div className="space-y-4">
+                {commentsLoading && <div className="text-sm text-slate-500">Memuat komentar...</div>}
+                {!commentsLoading && comments.length === 0 && (
+                  <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-5 py-10 text-center text-sm text-slate-500">
+                    Belum ada komentar yang ditampilkan. Jadilah yang pertama berdiskusi.
+                  </div>
+                )}
+
+                {!commentsLoading && comments.map((item) => (
+                  <article key={item.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-bold text-slate-900">{item.commenter_name}</p>
+                        <p className="text-xs text-slate-500">{formatDateTime(item.created_at)}</p>
+                      </div>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-700">
+                        <MessageCircle size={12} /> Komentar
+                      </span>
+                    </div>
+                    <p className="mt-4 whitespace-pre-line text-sm leading-7 text-slate-700">{item.comment}</p>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </section>
+        </div>
 
         <aside className="lg:col-span-4">
           <div className="lg:sticky lg:top-24 space-y-5">
