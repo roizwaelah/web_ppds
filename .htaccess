@@ -1,0 +1,58 @@
+# Root Apache configuration for SPA + PHP API.
+
+Options -Indexes
+ServerSignature Off
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Block access to hidden files/directories except the ACME challenge path.
+  RewriteRule "(^|/)\." - [F,L]
+
+  # Send existing files/directories directly.
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Let the PHP API and uploaded files keep their native paths.
+  RewriteRule ^(?:api|uploads)(?:/|$) - [L]
+
+  # Front-controller for Vite SPA routes.
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# Protect sensitive project and build files.
+<FilesMatch "^(?:\.env|\.env\..*|package(?:-lock)?\.json|vite\.config\.(?:js|ts)|README\.md|LICENSE|CSRF\.txt)$">
+  Require all denied
+</FilesMatch>
+
+<FilesMatch "^(?:composer\.(?:json|lock)|phpunit\.xml(?:\.dist)?|Dockerfile|docker-compose\.ya?ml)$">
+  Require all denied
+</FilesMatch>
+
+# Disable MIME sniffing and clickjacking, keep a strict referrer policy.
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "accelerometer=(), autoplay=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
+
+  <FilesMatch "\.(?:html?|js|mjs|css|json|svg|xml)$">
+    Header always set Cache-Control "public, max-age=3600"
+  </FilesMatch>
+
+  <FilesMatch "\.(?:png|jpe?g|gif|webp|ico|pdf|woff2?)$">
+    Header always set Cache-Control "public, max-age=2592000, immutable"
+  </FilesMatch>
+</IfModule>
+
+# Compress text-based assets when Apache modules are available.
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/plain text/html text/css text/javascript application/javascript application/json application/xml image/svg+xml
+</IfModule>
+
+# Keep common MIME types explicit.
+<IfModule mod_mime.c>
+  AddType application/javascript .js .mjs
+  AddType image/webp .webp
+</IfModule>
