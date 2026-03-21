@@ -420,3 +420,7 @@ function requireAdmin()
     return requireRoleLevel(5);
 }
 
+function requireEditor()
+{
+    return requireRoleLevel(1);
+}
