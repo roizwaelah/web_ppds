@@ -11,6 +11,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Tulis konten di
       [{ indent: '-1' }, { indent: '+1' }],
       [{ color: [] }, { background: [] }],
       [{ align: [] }],
+      [{ direction: 'rtl' }],
       ['blockquote', 'code-block'],
       ['link', 'image'],
       ['clean'],

@@ -261,29 +261,28 @@ export function DataProvider({ children }) {
   /* ===== PENGUMUMAN ========== */
   /* ============================= */
 
+  const refreshPengumuman = useCallback(async () => {
+    const response = await api.getPengumuman();
+    const normalized = normalizeArray(response);
+    setData(prev => ({ ...prev, pengumuman: normalized }));
+    return normalized;
+  }, []);
+
   const addPengumuman = async (item) => {
     const cleaned = { ...item, content: sanitizeRichText(item.content) };
-    const created = await api.createPengumuman(cleaned);
-    if (!created?.id) return fetchAll();
-    setData(prev => ({ ...prev, pengumuman: [created, ...prev.pengumuman] }));
+    await api.createPengumuman(cleaned);
+    return refreshPengumuman();
   };
 
   const updatePengumuman = async (id, payload) => {
     const cleaned = { ...payload, content: sanitizeRichText(payload.content) };
-    const updated = await api.updatePengumumanApi(id, cleaned);
-    if (!updated?.id) return fetchAll();
-    setData(prev => ({
-      ...prev,
-      pengumuman: prev.pengumuman.map(a => String(a.id) === String(id) ? updated : a)
-    }));
+    await api.updatePengumumanApi(id, cleaned);
+    return refreshPengumuman();
   };
 
   const deletePengumuman = async (id) => {
     await api.deletePengumumanApi(id);
-    setData(prev => ({
-      ...prev,
-      pengumuman: prev.pengumuman.filter(a => String(a.id) !== String(id))
-    }));
+    return refreshPengumuman();
   };
 
   /* ============================= */
@@ -323,6 +322,7 @@ export function DataProvider({ children }) {
         addPengumuman,
         updatePengumuman,
         deletePengumuman,
+        refreshPengumuman,
         updatePendaftaran,
       }}
     >

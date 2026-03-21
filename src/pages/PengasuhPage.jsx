@@ -39,11 +39,17 @@ export function PengasuhPage() {
           {pengasuh.map((item) => (
             <div key={item.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
               <div className="aspect-square overflow-hidden bg-gray-100">
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-full h-full object-cover"
-                />
+                {item.image ? (
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-sm text-gray-400">
+                    Tidak ada foto
+                  </div>
+                )}
               </div>
               <div className="p-6">
                 <h3 className="text-xl font-bold text-gray-900 mb-1">{item.name}</h3>

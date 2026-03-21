@@ -1,11 +1,22 @@
 import { Menu, X, ChevronDown, LogIn } from 'lucide-react';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [mobileDropdownOpen, setMobileDropdownOpen] = useState(null);
+  const location = useLocation();
+  const pathname = location.pathname;
+
+  const isActive = (path) => {
+    if (!path || path === '#') return false;
+    if (path === '/') return pathname === '/';
+    return pathname === path || pathname.startsWith(`${path}/`);
+  };
+
+  const isSubmenuActive = (submenu = []) =>
+    submenu.some((subitem) => isActive(subitem.href));
 
   // Definisi array objek tanpa type MenuItem[]
   const navigation = [
@@ -46,14 +57,24 @@ export function Header() {
                 onMouseLeave={() => setActiveDropdown(null)}
               >
                 {item.submenu ? (
-                  <span className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors flex items-center gap-1 cursor-pointer">
+                  <span
+                    className={`px-3 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-1 cursor-pointer border-b-2 ${
+                      isSubmenuActive(item.submenu)
+                        ? 'text-emerald-700 bg-emerald-50 border-emerald-600'
+                        : 'text-gray-700 hover:text-emerald-600 hover:bg-emerald-50 border-transparent'
+                    }`}
+                  >
                     {item.name}
                     <ChevronDown className="w-4 h-4" />
                   </span>
                 ) : (
                   <Link
                     to={item.href}
-                    className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors flex items-center gap-1"
+                    className={`px-3 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-1 border-b-2 ${
+                      isActive(item.href)
+                        ? 'text-emerald-700 bg-emerald-50 border-emerald-600'
+                        : 'text-gray-700 hover:text-emerald-600 hover:bg-emerald-50 border-transparent'
+                    }`}
                   >
                     {item.name}
                   </Link>
@@ -66,7 +87,11 @@ export function Header() {
                         <Link
                           key={subitem.name}
                           to={subitem.href}
-                          className="block px-4 py-2 text-sm text-gray-700 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
+                          className={`block px-4 py-2 text-sm transition-colors ${
+                            isActive(subitem.href)
+                              ? 'text-emerald-700 bg-emerald-50 font-medium'
+                              : 'text-gray-700 hover:text-emerald-600 hover:bg-emerald-50'
+                          }`}
                         >
                           {subitem.name}
                         </Link>
@@ -106,7 +131,11 @@ export function Header() {
                                 mobileDropdownOpen === item.name ? null : item.name
                               )
                             }
-                            className="w-full text-left px-3 py-2 text-sm font-medium text-gray-700 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors flex items-center justify-between"
+                            className={`w-full text-left px-3 py-2 text-sm font-medium rounded-md transition-colors flex items-center justify-between border-l-2 ${
+                              isSubmenuActive(item.submenu)
+                                ? 'text-emerald-700 bg-emerald-50 border-emerald-600'
+                                : 'text-gray-700 hover:text-emerald-600 hover:bg-emerald-50 border-transparent'
+                            }`}
                           >
                             <span>{item.name}</span>
                             <ChevronDown
@@ -125,7 +154,11 @@ export function Header() {
                                     setMobileMenuOpen(false);
                                     setMobileDropdownOpen(null);
                                   }}
-                                  className="block px-3 py-2 text-sm text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors"
+                                  className={`block px-3 py-2 text-sm rounded-md transition-colors border-l-2 ${
+                                    isActive(subitem.href)
+                                      ? 'text-emerald-700 bg-emerald-50 border-emerald-600 font-medium'
+                                      : 'text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 border-transparent'
+                                  }`}
                                 >
                                   {subitem.name}
                                 </Link>
@@ -137,7 +170,11 @@ export function Header() {
                         <Link
                           to={item.href}
                           onClick={() => setMobileMenuOpen(false)}
-                          className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors"
+                          className={`block px-3 py-2 text-sm font-medium rounded-md transition-colors border-l-2 ${
+                            isActive(item.href)
+                              ? 'text-emerald-700 bg-emerald-50 border-emerald-600'
+                              : 'text-gray-700 hover:text-emerald-600 hover:bg-emerald-50 border-transparent'
+                          }`}
                         >
                           {item.name}
                         </Link>

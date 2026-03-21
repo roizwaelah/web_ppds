@@ -6,9 +6,13 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profilOpen, setProfilOpen] = useState(false);
   const location = useLocation();
+  const pathname = location.pathname;
 
-  const isActive = (path) => location.pathname === path;
-  const isProfilActive = location.pathname.startsWith("/profil");
+  const isActive = (path) => {
+    if (path === "/") return pathname === "/";
+    return pathname === path || pathname.startsWith(`${path}/`);
+  };
+  const isProfilActive = pathname.startsWith("/profil");
 
   const navItems = [
     { label: "Beranda", path: "/" },
@@ -92,10 +96,10 @@ export function Navbar() {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border-b-2 ${
                     isActive(item.path)
-                      ? "text-emerald-700 bg-emerald-50"
-                      : "text-gray-700 hover:text-emerald-700 hover:bg-emerald-50"
+                      ? "text-emerald-700 bg-emerald-50 border-emerald-600"
+                      : "text-gray-700 hover:text-emerald-700 hover:bg-emerald-50 border-transparent"
                   }`}
                 >
                   {item.label}
@@ -129,10 +133,10 @@ export function Navbar() {
                       key={child.path}
                       to={child.path}
                       onClick={() => setMobileOpen(false)}
-                      className={`block px-3 py-2.5 pl-6 rounded-lg text-sm ${
+                      className={`block px-3 py-2.5 pl-6 rounded-lg text-sm border-l-2 ${
                         isActive(child.path)
-                          ? "text-emerald-700 bg-emerald-50 font-medium"
-                          : "text-gray-600 hover:text-emerald-700 hover:bg-emerald-50"
+                          ? "text-emerald-700 bg-emerald-50 font-medium border-emerald-600"
+                          : "text-gray-600 hover:text-emerald-700 hover:bg-emerald-50 border-transparent"
                       }`}
                     >
                       {child.label}
@@ -144,10 +148,10 @@ export function Navbar() {
                   key={item.path}
                   to={item.path}
                   onClick={() => setMobileOpen(false)}
-                  className={`block px-3 py-2.5 rounded-lg text-sm ${
+                  className={`block px-3 py-2.5 rounded-lg text-sm border-l-2 ${
                     isActive(item.path)
-                      ? "text-emerald-700 bg-emerald-50 font-medium"
-                      : "text-gray-600 hover:text-emerald-700 hover:bg-emerald-50"
+                      ? "text-emerald-700 bg-emerald-50 font-medium border-emerald-600"
+                      : "text-gray-600 hover:text-emerald-700 hover:bg-emerald-50 border-transparent"
                   }`}
                 >
                   {item.label}

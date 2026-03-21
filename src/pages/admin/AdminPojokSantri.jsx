@@ -13,6 +13,10 @@ export function AdminPojokSantri() {
   const [editingId, setEditingId] = useState(null);
   const [search, setSearch] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, id: null });
+  const defaultCategories = ['Prestasi', 'Tips & Trik', 'Kegiatan', 'Opini', 'Cerita'];
+  const [categoryOptions, setCategoryOptions] = useState(defaultCategories);
+  const [addingCategory, setAddingCategory] = useState(false);
+  const [newCategory, setNewCategory] = useState('');
   const [form, setForm] = useState({
     title: '',
     content: '',
@@ -24,13 +28,19 @@ export function AdminPojokSantri() {
     status: 'published',
   });
 
-  const categories = ['Prestasi', 'Tips & Trik', 'Kegiatan', 'Opini', 'Cerita'];
-
   useEffect(() => {
     refreshPojokSantri('all').catch(() => {
       showToast('Gagal memuat data artikel dari database', 'error');
     });
   }, [refreshPojokSantri, showToast]);
+
+  useEffect(() => {
+    const fromData = (Array.isArray(pojokSantri) ? pojokSantri : [])
+      .map((item) => (item.category || '').trim())
+      .filter(Boolean);
+
+    setCategoryOptions((prev) => Array.from(new Set([...prev, ...fromData])));
+  }, [pojokSantri]);
 
   const resetForm = () => {
     setForm({
@@ -44,10 +54,17 @@ export function AdminPojokSantri() {
       status: 'published',
     });
     setEditingId(null);
+    setAddingCategory(false);
+    setNewCategory('');
     setShowForm(false);
   };
 
   const handleEdit = (article) => {
+    const currentCategory = article.category || 'Kegiatan';
+    setCategoryOptions((prev) =>
+      prev.includes(currentCategory) ? prev : [...prev, currentCategory]
+    );
+
     setForm({
       title: article.title || '',
       content: article.content || '',
@@ -55,11 +72,42 @@ export function AdminPojokSantri() {
       authorRole: article.authorRole || '',
       date: article.date || new Date().toISOString().split('T')[0],
       image: article.image || '',
-      category: article.category || 'Kegiatan',
+      category: currentCategory,
       status: article.status || 'published',
     });
+    setAddingCategory(false);
+    setNewCategory('');
     setEditingId(article.id);
     setShowForm(true);
+  };
+
+  const handleCategoryChange = (value) => {
+    if (value === '__add__') {
+      setAddingCategory(true);
+      return;
+    }
+
+    setAddingCategory(false);
+    setNewCategory('');
+    setForm({ ...form, category: value });
+  };
+
+  const handleAddCategory = () => {
+    const category = newCategory.trim();
+    if (!category) {
+      showToast('Nama kategori tidak boleh kosong', 'error');
+      return;
+    }
+
+    if (category.length > 50) {
+      showToast('Kategori maksimal 50 karakter', 'error');
+      return;
+    }
+
+    setCategoryOptions((prev) => (prev.includes(category) ? prev : [...prev, category]));
+    setForm({ ...form, category });
+    setAddingCategory(false);
+    setNewCategory('');
   };
 
   const handleSave = async () => {
@@ -175,13 +223,32 @@ export function AdminPojokSantri() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
               <select
                 value={form.category}
-                onChange={(e) => setForm({ ...form, category: e.target.value })}
+                onChange={(e) => handleCategoryChange(e.target.value)}
                 className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none bg-white"
               >
-                {categories.map((cat) => (
+                {categoryOptions.map((cat) => (
                   <option key={cat} value={cat}>{cat}</option>
                 ))}
+                <option value="__add__">+ Tambah Kategori</option>
               </select>
+              {addingCategory && (
+                <div className="mt-2 flex gap-2">
+                  <input
+                    type="text"
+                    value={newCategory}
+                    onChange={(e) => setNewCategory(e.target.value)}
+                    placeholder="Nama kategori baru"
+                    className="flex-1 px-3 py-2 rounded-lg border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddCategory}
+                    className="px-3 py-2 text-sm font-medium rounded-lg bg-emerald-600 text-white hover:bg-emerald-700"
+                  >
+                    Tambah
+                  </button>
+                </div>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>

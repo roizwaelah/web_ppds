@@ -12,7 +12,7 @@ export function Footer() {
               <p className="text-base text-emerald-500 font-medium">Lembaga Pendidikan Islam Terpadu</p>
             </div>
             <p className="text-[15px] text-gray-400 leading-relaxed mb-4 max-w-md">
-              Pondok Pesantren Darussalam adalah lembaga pendidikan Islam yang berkomitmen untuk membentuk
+              Pondok Pesantren Darussalam Panusupan adalah lembaga pendidikan Islam yang berkomitmen untuk membentuk
               generasi yang berakhlak mulia, berilmu pengetahuan, dan bermanfaat bagi masyarakat.
             </p>
           </div>

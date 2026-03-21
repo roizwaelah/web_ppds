@@ -6,6 +6,7 @@ import { useData } from '../contexts/DataContext';
 import { createPojokSantri } from '../lib/api';
 import { useNotification } from '../contexts/NotificationContext';
 import { stripHTML } from '../utils/text';
+import { RichTextEditor } from '../components/ui/RichTextEditor';
 
 const FALLBACK_IMAGE = 'https://placehold.co/1200x675?text=Pojok+Santri';
 
@@ -53,6 +54,7 @@ export function PojokSantriPage() {
     content: '',
     author: '',
     authorRole: '',
+    category: 'Cerita',
   });
 
   useEffect(() => {
@@ -76,6 +78,13 @@ export function PojokSantriPage() {
   const featured = publishedArticles[0] || null;
   const popularItems = publishedArticles.slice(0, 5);
   const nonHeadlineItems = publishedArticles.slice(1);
+  const formCategoryOptions = useMemo(() => {
+    const base = ['Cerita', 'Prestasi', 'Kegiatan', 'Opini', 'Tips'];
+    const dynamic = publishedArticles
+      .map((item) => (item.category || '').trim())
+      .filter(Boolean);
+    return Array.from(new Set([...base, ...dynamic]));
+  }, [publishedArticles]);
 
   const filteredItems = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
@@ -113,8 +122,9 @@ export function PojokSantriPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const plainContent = stripHTML(form.content || '').trim();
 
-    if (!form.title.trim() || !form.content.trim() || !form.author.trim()) {
+    if (!form.title.trim() || !plainContent || !form.author.trim()) {
       showToast('Judul, Isi, dan Nama Penulis wajib diisi', 'error');
       return;
     }
@@ -124,13 +134,13 @@ export function PojokSantriPage() {
       await createPojokSantri({
         ...form,
         image: '',
-        category: 'Cerita',
+        category: form.category || 'Cerita',
         date: new Date().toISOString().split('T')[0],
         status: 'draft',
       });
 
       showToast('Artikel berhasil dikirim, menunggu review admin.', 'success');
-      setForm({ title: '', content: '', author: '', authorRole: '' });
+      setForm({ title: '', content: '', author: '', authorRole: '', category: 'Cerita' });
       setShowForm(false);
     } catch {
       showToast('Gagal mengirim artikel. Silakan coba lagi.', 'error');
@@ -219,15 +229,28 @@ export function PojokSantriPage() {
                     placeholder="Misal: Kelas XI MA"
                   />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+                  <select
+                    value={form.category}
+                    onChange={(e) => setForm({ ...form, category: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none text-sm bg-white"
+                  >
+                    {formCategoryOptions.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Isi Artikel *</label>
-                <textarea
-                  rows={6}
+                <RichTextEditor
                   value={form.content}
-                  onChange={(e) => setForm({ ...form, content: e.target.value })}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none text-sm resize-none"
-                  placeholder="Tulis cerita atau pengalaman Anda di sini..."
+                  onChange={(value) => setForm({ ...form, content: value })}
+                  placeholder="Tulis artikel, berita, opini, cerita atau pengalaman Anda di sini..."
+                  className="rounded-lg"
                 />
               </div>
               <div className="flex items-center justify-end gap-3 pt-2">

@@ -1,11 +1,36 @@
 import { Link } from "react-router-dom";
+import { useEffect } from "react";
 import { PublicLayout } from "../components/PublicLayout"; // Pastikan path benar
 import { useData } from "../contexts/DataContext";
 import { ArrowRight, Calendar, AlertCircle } from "lucide-react";
 import { PublicRichTextRenderer } from "../components/ui/PublicRichTextRenderer";
 
 export function PengumumanPage() {
-  const { pengumuman } = useData();
+  const { pengumuman, refreshPengumuman } = useData();
+
+  useEffect(() => {
+    const refreshNow = () => {
+      refreshPengumuman().catch(() => {});
+    };
+
+    refreshNow();
+
+    const intervalId = window.setInterval(refreshNow, 30000);
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        refreshNow();
+      }
+    };
+
+    window.addEventListener("focus", refreshNow);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", refreshNow);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, [refreshPengumuman]);
 
   // Loading state yang disesuaikan
   if (!pengumuman) {
