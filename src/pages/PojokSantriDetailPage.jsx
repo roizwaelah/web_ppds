@@ -176,9 +176,6 @@ export function PojokSantriDetailPage() {
   const handleDownloadPdf = () => {
     if (typeof window === 'undefined') return;
 
-    const printWindow = window.open('', '_blank', 'noopener,noreferrer,width=960,height=720');
-    if (!printWindow) return;
-
     const printableContent = `<!doctype html>
 <html lang="id">
   <head>
@@ -187,7 +184,7 @@ export function PojokSantriDetailPage() {
     <title>${article?.title || 'Artikel Pojok Santri'}</title>
     <style>
       body { font-family: Arial, sans-serif; padding: 32px; color: #0f172a; line-height: 1.7; }
-      img { max-width: 100%; height: auto; border-radius: 12px; margin-bottom: 24px; }
+      img { display: block; max-width: 100%; height: auto; border-radius: 12px; margin: 0 0 24px; }
       h1 { font-size: 32px; margin-bottom: 8px; }
       .meta { color: #475569; font-size: 14px; margin-bottom: 24px; }
       .content { font-size: 16px; }
@@ -199,23 +196,51 @@ export function PojokSantriDetailPage() {
     <div class="meta">${article?.author || 'Tim Redaksi'} • ${formatDate(article?.date || article?.created_at)}</div>
     ${article?.image ? `<img src="${toSafeImage(article.image)}" alt="${article.title || ''}" />` : ''}
     <div class="content">${article?.content || ''}</div>
+    <script>
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          window.focus();
+          window.print();
+        }, 300);
+      });
+      window.addEventListener('afterprint', () => window.close());
+    <\/script>
   </body>
 </html>`;
 
-    printWindow.document.open();
-    printWindow.document.write(printableContent);
-    printWindow.document.close();
-    printWindow.focus();
+    const htmlBlob = new Blob([printableContent], { type: 'text/html' });
+    const htmlUrl = URL.createObjectURL(htmlBlob);
+    const printWindow = window.open(htmlUrl, '_blank');
 
-    const triggerPrint = () => {
-      printWindow.print();
-      printWindow.close();
-    };
+    if (!printWindow) {
+      URL.revokeObjectURL(htmlUrl);
+      return;
+    }
 
-    if (printWindow.document.readyState === 'complete') {
-      triggerPrint();
-    } else {
-      printWindow.onload = triggerPrint;
+    const revokeUrl = () => URL.revokeObjectURL(htmlUrl);
+    printWindow.addEventListener('load', revokeUrl, { once: true });
+    setTimeout(revokeUrl, 60000);
+  };
+
+  const handleCommentSubmit = async (event) => {
+    event.preventDefault();
+    setCommentSuccess('');
+    setCommentError('');
+
+    try {
+      setSubmittingComment(true);
+      await createPojokSantriComment({
+        articleId: Number(id),
+        name: commentForm.name,
+        email: commentForm.email,
+        comment: commentForm.comment,
+      });
+      setCommentForm({ name: '', email: '', comment: '' });
+      setCommentSuccess('Komentar berhasil dikirim dan akan tampil setelah disetujui admin.');
+    } catch (error) {
+      setCommentError(error.message || 'Gagal mengirim komentar');
+    } finally {
+      setSubmittingComment(false);
     }
   };
 
@@ -431,7 +456,7 @@ export function PojokSantriDetailPage() {
                   title="Bagikan ke WhatsApp"
                   className="inline-flex h-11 w-11 items-center justify-center rounded-md bg-[#25D366] text-white hover:bg-[#1fb85a] transition-colors"
                 >
-                  <MessageCircle size={18} />
+                  <WhatsAppIcon className="h-[18px] w-[18px]" />
                 </a>
                 <button
                   onClick={handleDownloadPdf}
