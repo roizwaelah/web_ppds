@@ -1,4 +1,4 @@
-Contact: mailto:security@darussalampanusupan.net
+Contact: mailto:ppdarsalcilongok@gmail.com
 Expires: 2027-03-21T00:00:00.000Z
 Preferred-Languages: id, en
 Canonical: https://darussalampanusupan.net/.well-known/security.txt
