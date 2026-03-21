@@ -1,0 +1,8 @@
+# Session secret
+SESSION_SECRET=IUW8RydE2OQXqNVUNEc9+J/rrtpBW/VKaIjpjIrxtwU=
+
+# Cookie signing secret
+COOKIE_SECRET=ktivR7jvIi5jo0C9FxXS8jqRhXZbtOB+XzfDLwU4IOo=
+
+# CSRF token secret
+CSRF_SECRET=uoQu37tSc1gGAZMi9CX4HqKdfwe3AUpzUBotkJHDP3E=
