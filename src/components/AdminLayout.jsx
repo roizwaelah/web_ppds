@@ -82,11 +82,11 @@ export function AdminLayout() {
     ...(access.canAccessPojokSantri
       ? [{ label: "Pojok Santri", path: "/admin/pojok-santri", icon: BookOpen }]
       : []),
-    ...(access.canAccessPengumuman
-      ? [{ label: "Pengumuman", path: "/admin/pengumuman", icon: Megaphone }]
-      : []),
     ...(access.canAccessKomentar
       ? [{ label: "Komentar", path: "/admin/komentar", icon: MessageSquare }]
+      : []),
+    ...(access.canAccessPengumuman
+      ? [{ label: "Pengumuman", path: "/admin/pengumuman", icon: Megaphone }]
       : []),
 
     ...(access.canAccessPendaftaran

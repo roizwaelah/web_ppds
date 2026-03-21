@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, Clock3, MessageSquare, Search, Trash2, XCircle } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { CheckCircle2, Clock3, MessageSquare, Trash2, XCircle } from 'lucide-react';
 import { useNotification } from '../../contexts/NotificationContext';
 import { ConfirmDialog } from '../../components/ui/Dialog';
 import { deletePojokSantriCommentApi, getPojokSantriComments, updatePojokSantriCommentStatusApi } from '../../lib/api';
@@ -28,7 +28,6 @@ export function AdminKomentar() {
   const [summary, setSummary] = useState({ pending: 0, approved: 0, rejected: 0 });
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState('pending');
-  const [search, setSearch] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, id: null });
 
   const loadComments = useCallback(async (selectedStatus = status) => {
@@ -47,17 +46,6 @@ export function AdminKomentar() {
   useEffect(() => {
     loadComments(status);
   }, [loadComments, status]);
-
-  const filteredComments = useMemo(() => {
-    const keyword = search.trim().toLowerCase();
-    if (!keyword) return comments;
-
-    return comments.filter((item) =>
-      [item.commenter_name, item.commenter_email, item.comment, item.article_title]
-        .filter(Boolean)
-        .some((value) => String(value).toLowerCase().includes(keyword))
-    );
-  }, [comments, search]);
 
   const handleStatusChange = async (id, nextStatus) => {
     try {
@@ -106,28 +94,15 @@ export function AdminKomentar() {
               <button
                 key={item.key}
                 onClick={() => setStatus(item.key)}
-                className={`rounded-2xl border px-4 py-3 text-left transition ${isActive ? 'border-emerald-500 bg-emerald-50 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300'}`}
+                className={`rounded-2xl border px-2 text-left transition ${isActive ? 'border-emerald-500 bg-emerald-50 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300'}`}
               >
                 <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
                   <Icon size={16} className={isActive ? 'text-emerald-600' : 'text-slate-400'} /> {item.label}
                 </div>
-                <p className="mt-2 text-2xl font-black text-slate-900">{summary[item.key] ?? 0}</p>
+                <p className="mt-1 text-sm font-black text-center text-slate-900">{summary[item.key] ?? 0}</p>
               </button>
             );
           })}
-        </div>
-      </div>
-
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5">
-        <div className="relative max-w-md">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Cari nama, email, isi komentar, atau judul artikel"
-            className="w-full rounded-xl border border-slate-300 pl-10 pr-4 py-2.5 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none"
-          />
         </div>
       </div>
 
@@ -138,13 +113,13 @@ export function AdminKomentar() {
           </div>
         )}
 
-        {!loading && filteredComments.length === 0 && (
+        {!loading && comments.length === 0 && (
           <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
             Belum ada komentar pada status ini.
           </div>
         )}
 
-        {!loading && filteredComments.map((comment) => {
+        {!loading && comments.map((comment) => {
           const meta = STATUS_META[comment.status] || STATUS_META.pending;
 
           return (
