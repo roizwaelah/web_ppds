@@ -210,6 +210,44 @@ export const updatePendaftaranApi = (payload) =>
     body: JSON.stringify(payload),
   });
 
+
+export const getMediaLibrary = () =>
+  apiFetch('/api/media.php');
+
+export const deleteMediaApi = (filename) =>
+  apiFetch('/api/media.php', {
+    method: 'DELETE',
+    body: JSON.stringify({ filename }),
+  });
+
+export const uploadMediaApi = async (file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const csrfToken = typeof window !== 'undefined'
+    ? getCookie('ppds_csrf')
+    : null;
+
+  const res = await fetch(`${API_BASE}/api/upload.php`, {
+    method: 'POST',
+    credentials: 'include',
+    body: formData,
+    headers: csrfToken ? { 'X-CSRF-Token': csrfToken } : {},
+  });
+
+  const contentType = res.headers.get('content-type') || '';
+
+  if (!res.ok) {
+    if (contentType.includes('application/json')) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || 'Upload gagal');
+    }
+    throw new Error('Upload gagal');
+  }
+
+  return res.json();
+};
+
 //
 // =========================
 // ===== AUTH ==============
