@@ -1,26 +1,26 @@
-import { useState } from 'react';
-import { useNavigate, useLocation, Link, Navigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { Lock, User, Loader2, ArrowLeft, Eye, EyeOff } from 'lucide-react';
-import { useNotification } from '../../contexts/NotificationContext';
+import { useState } from "react";
+import { useNavigate, useLocation, Link, Navigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import { Lock, User, Loader2, ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { useNotification } from "../../contexts/NotificationContext";
 
 export function Login() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  
+
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { showToast } = useNotification();
-  
+
   const { user } = useAuth();
   if (user) {
     return <Navigate to="/admin" replace />;
   }
 
-  const from = location.state?.from?.pathname || '/admin';
+  const from = location.state?.from?.pathname || "/admin";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,15 +32,15 @@ export function Login() {
       const success = await login(username.trim(), password);
 
       if (success) {
-        showToast('Login berhasil! Selamat datang kembali.', 'success');
+        showToast("Login berhasil! Selamat datang kembali.", "success");
         navigate(from, { replace: true });
       } else {
-        setPassword(''); // 🔥 clear password on fail
-        showToast('Username atau password salah', 'error');
+        setPassword(""); // 🔥 clear password on fail
+        showToast("Username atau password salah", "error");
       }
     } catch {
-      setPassword('');
-      showToast('Terjadi kesalahan sistem.', 'error');
+      setPassword("");
+      showToast("Terjadi kesalahan sistem.", "error");
     } finally {
       setLoading(false);
     }
@@ -56,13 +56,13 @@ export function Login() {
         {/* Header Section */}
         <div className="text-center mb-6">
           <div className="inline-flex p-3 bg-white rounded-2xl shadow-lg shadow-slate-200/50 mb-4 group transition-transform hover:scale-105">
-            <img 
-              src="/logo.png" 
-              alt="Logo PP Darussalam" 
+            <img
+              src="/logo.webp"
+              alt="Logo PP Darussalam"
               className="h-10 sm:h-12 w-auto object-contain"
               onError={(e) => {
                 e.target.onerror = null;
-                e.target.src = '/images/placeholder.svg';
+                e.target.src = "/images/placeholder.svg";
               }}
             />
           </div>
@@ -77,7 +77,9 @@ export function Login() {
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Username Input */}
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Username</label>
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+                  Username
+                </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-emerald-500 transition-colors">
                     <User className="h-4 w-4" />
@@ -96,7 +98,9 @@ export function Login() {
 
               {/* Password Input */}
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Password</label>
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+                  Password
+                </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-emerald-500 transition-colors">
                     <Lock className="h-4 w-4" />
@@ -115,7 +119,11 @@ export function Login() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-emerald-600 transition-colors"
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -132,16 +140,16 @@ export function Login() {
                     Memverifikasi...
                   </>
                 ) : (
-                  'Masuk ke Akun'
+                  "Masuk ke Akun"
                 )}
               </button>
             </form>
           </div>
-          
+
           {/* Footer Back Button */}
           <div className="px-5 py-4 bg-slate-50/50 border-t border-slate-50 text-center">
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-emerald-600 transition-colors group"
             >
               <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
@@ -149,7 +157,7 @@ export function Login() {
             </Link>
           </div>
         </div>
-        
+
         {/* Copyright */}
         <p className="text-center text-slate-400 text-[9px] sm:text-[10px] mt-7 leading-relaxed font-medium uppercase tracking-[0.12em]">
           PP Darussalam Panusupan &copy; {new Date().getFullYear()}

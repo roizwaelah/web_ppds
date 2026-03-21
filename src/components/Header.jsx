@@ -42,7 +42,7 @@ export function Header() {
         <div className="flex justify-between items-center h-16 md:h-20">
           <Link to="/" className="flex items-center gap-3">
             <img
-              src="/header_ppds.png"
+              src="/header_ppds.webp"
               alt="Pondok Pesantren Darussalam"
               className="h-10 md:h-14 w-auto"
             />

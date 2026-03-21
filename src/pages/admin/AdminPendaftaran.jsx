@@ -189,7 +189,7 @@ export function AdminPendaftaran() {
                       value={form.registrationUrl}
                       onChange={(e) => setForm({ ...form, registrationUrl: e.target.value })}
                       className="w-full pl-3 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500/10 outline-none transition-all text-sm font-medium text-slate-700"
-                      placeholder="https://psb.darussalampanusupan.com"
+                      placeholder="https://daftar.darussalampanusupan.net"
                     />
                   </div>
                   {form.registrationUrl && (

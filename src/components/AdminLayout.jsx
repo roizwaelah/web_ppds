@@ -1,13 +1,26 @@
-import { useState } from 'react';
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { getAdminAccess } from '../lib/adminAccess';
-import { ConfirmDialog } from '../components/ui/Dialog';
+import { useState } from "react";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import { getAdminAccess } from "../lib/adminAccess";
+import { ConfirmDialog } from "../components/ui/Dialog";
 import {
-  LayoutDashboard, FileText, Target, Users, LogOut, Menu, X,
-  ChevronDown, Image, GraduationCap, BookOpen, Megaphone,
-  ClipboardList, Building2, Shield, Globe
-} from 'lucide-react';
+  LayoutDashboard,
+  FileText,
+  Target,
+  Users,
+  LogOut,
+  Menu,
+  X,
+  ChevronDown,
+  Image,
+  GraduationCap,
+  BookOpen,
+  Megaphone,
+  ClipboardList,
+  Building2,
+  Shield,
+  Globe,
+} from "lucide-react";
 
 export function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -18,47 +31,73 @@ export function AdminLayout() {
   const [confirmLogout, setConfirmLogout] = useState(false);
 
   const isActive = (path) => location.pathname === path;
-  const isParentActive = (children) => children?.some((c) => location.pathname === c.path);
-  const toggleMenu = (key) => setExpandedMenus((prev) => ({ ...prev, [key]: !prev[key] }));
+  const isParentActive = (children) =>
+    children?.some((c) => location.pathname === c.path);
+  const toggleMenu = (key) =>
+    setExpandedMenus((prev) => ({ ...prev, [key]: !prev[key] }));
 
   const access = getAdminAccess(user?.level);
 
   const sidebarItems = [
-    ...(access.canAccessDashboard ? [
-      { label: 'Dashboard', path: '/admin', icon: LayoutDashboard },
-    ] : []),
-    ...(access.canAccessMedia ? [
-      { label: 'Media', path: '/admin/media', icon: Image },
-    ] : []),
-    ...(access.canAccessHeroSlides ? [
-      { label: 'Hero Slide', path: '/admin/hero-slides', icon: Image },
-      {
-        label: 'Profil Pondok',
-        icon: Building2,
-        key: 'profil',
-        children: [
-          { label: 'Sekilas Pandang', path: '/admin/profil/sekilas-pandang', icon: FileText },
-          { label: 'Visi & Misi', path: '/admin/profil/visi-misi', icon: Target },
-          { label: 'Pengasuh', path: '/admin/profil/pengasuh', icon: Users },
-        ],
-      },
-      { label: 'Pendidikan', path: '/admin/pendidikan', icon: GraduationCap },
-    ] : []),
+    ...(access.canAccessDashboard
+      ? [{ label: "Dashboard", path: "/admin", icon: LayoutDashboard }]
+      : []),
+    ...(access.canAccessMedia
+      ? [{ label: "Media", path: "/admin/media", icon: Image }]
+      : []),
+    ...(access.canAccessHeroSlides
+      ? [
+          { label: "Hero Slide", path: "/admin/hero-slides", icon: Image },
+          {
+            label: "Profil Pondok",
+            icon: Building2,
+            key: "profil",
+            children: [
+              {
+                label: "Sekilas Pandang",
+                path: "/admin/profil/sekilas-pandang",
+                icon: FileText,
+              },
+              {
+                label: "Visi & Misi",
+                path: "/admin/profil/visi-misi",
+                icon: Target,
+              },
+              {
+                label: "Pengasuh",
+                path: "/admin/profil/pengasuh",
+                icon: Users,
+              },
+            ],
+          },
+          {
+            label: "Pendidikan",
+            path: "/admin/pendidikan",
+            icon: GraduationCap,
+          },
+        ]
+      : []),
 
-    ...(access.canAccessPojokSantri ? [
-      { label: 'Pojok Santri', path: '/admin/pojok-santri', icon: BookOpen },
-    ] : []),
-    ...(access.canAccessPengumuman ? [
-      { label: 'Pengumuman', path: '/admin/pengumuman', icon: Megaphone },
-    ] : []),
+    ...(access.canAccessPojokSantri
+      ? [{ label: "Pojok Santri", path: "/admin/pojok-santri", icon: BookOpen }]
+      : []),
+    ...(access.canAccessPengumuman
+      ? [{ label: "Pengumuman", path: "/admin/pengumuman", icon: Megaphone }]
+      : []),
 
-    ...(access.canAccessPendaftaran ? [
-      { label: 'Pendaftaran', path: '/admin/pendaftaran', icon: ClipboardList },
-    ] : []),
+    ...(access.canAccessPendaftaran
+      ? [
+          {
+            label: "Pendaftaran",
+            path: "/admin/pendaftaran",
+            icon: ClipboardList,
+          },
+        ]
+      : []),
 
-    ...(access.canAccessUsers ? [
-      { label: 'Manajemen User', path: '/admin/users', icon: Shield },
-    ] : []),
+    ...(access.canAccessUsers
+      ? [{ label: "Manajemen User", path: "/admin/users", icon: Shield }]
+      : []),
   ];
 
   return (
@@ -77,7 +116,7 @@ export function AdminLayout() {
           fixed inset-y-0 left-0 z-50 flex flex-col
           w-52 lg:w-48 bg-emerald-900 text-white
           transform transition-transform duration-200
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
           lg:translate-x-0 lg:relative lg:shrink-0
         `}
       >
@@ -85,11 +124,19 @@ export function AdminLayout() {
         <div className="h-10 flex items-center justify-between px-3 border-b border-emerald-800/50 shrink-0">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 bg-white rounded flex items-center justify-center p-0.5">
-              <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
+              <img
+                src="/logo.webp"
+                alt="Logo"
+                className="w-full h-full object-contain"
+              />
             </div>
             <div>
-              <p className="text-[11px] font-bold truncate">{user?.name || 'Administrator'}</p>
-              <p className="text-[9px] text-emerald-400 uppercase tracking-wide">{user?.role?.toUpperCase()}</p>
+              <p className="text-[11px] font-bold truncate">
+                {user?.name || "Administrator"}
+              </p>
+              <p className="text-[9px] text-emerald-400 uppercase tracking-wide">
+                {user?.role?.toUpperCase()}
+              </p>
             </div>
           </div>
           <button
@@ -110,26 +157,36 @@ export function AdminLayout() {
                     onClick={() => toggleMenu(item.key)}
                     className={`
                       w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-all
-                      ${isParentActive(item.children)
-                        ? 'bg-emerald-800/60 text-white'
-                        : 'text-emerald-100/80 hover:bg-emerald-800/40'
+                      ${
+                        isParentActive(item.children)
+                          ? "bg-emerald-800/60 text-white"
+                          : "text-emerald-100/80 hover:bg-emerald-800/40"
                       }
                     `}
                   >
                     <div className="flex items-center gap-2">
-                      <item.icon size={15} className={isParentActive(item.children) ? 'text-emerald-400' : ''} />
+                      <item.icon
+                        size={15}
+                        className={
+                          isParentActive(item.children)
+                            ? "text-emerald-400"
+                            : ""
+                        }
+                      />
                       <span className="font-medium">{item.label}</span>
                     </div>
                     <ChevronDown
                       size={11}
-                      className={`transition-transform ${expandedMenus[item.key] ? 'rotate-180' : ''}`}
+                      className={`transition-transform ${expandedMenus[item.key] ? "rotate-180" : ""}`}
                     />
                   </button>
 
-                  <div className={`
+                  <div
+                    className={`
                     overflow-hidden transition-all duration-150
-                    ${expandedMenus[item.key] ? 'max-h-32 opacity-100' : 'max-h-0 opacity-0'}
-                  `}>
+                    ${expandedMenus[item.key] ? "max-h-32 opacity-100" : "max-h-0 opacity-0"}
+                  `}
+                  >
                     <div className="mt-0.5 ml-2.5 pl-2.5 border-l border-emerald-700/50 space-y-0.5">
                       {item.children.map((child) => (
                         <Link
@@ -138,13 +195,16 @@ export function AdminLayout() {
                           onClick={() => setSidebarOpen(false)}
                           className={`
                             flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] transition-all
-                            ${isActive(child.path)
-                              ? 'text-emerald-400 font-medium bg-emerald-800/30'
-                              : 'text-emerald-100/60 hover:text-emerald-300'
+                            ${
+                              isActive(child.path)
+                                ? "text-emerald-400 font-medium bg-emerald-800/30"
+                                : "text-emerald-100/60 hover:text-emerald-300"
                             }
                           `}
                         >
-                          <div className={`w-1.5 h-1.5 rounded-full ${isActive(child.path) ? 'bg-emerald-400' : 'bg-emerald-700'}`} />
+                          <div
+                            className={`w-1.5 h-1.5 rounded-full ${isActive(child.path) ? "bg-emerald-400" : "bg-emerald-700"}`}
+                          />
                           {child.label}
                         </Link>
                       ))}
@@ -157,9 +217,10 @@ export function AdminLayout() {
                   onClick={() => setSidebarOpen(false)}
                   className={`
                     flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs transition-all
-                    ${isActive(item.path)
-                      ? 'bg-emerald-600 text-white font-medium'
-                      : 'text-emerald-100/80 hover:bg-emerald-800/40'
+                    ${
+                      isActive(item.path)
+                        ? "bg-emerald-600 text-white font-medium"
+                        : "text-emerald-100/80 hover:bg-emerald-800/40"
                     }
                   `}
                 >
@@ -194,8 +255,8 @@ export function AdminLayout() {
               <Menu size={18} />
             </button>
             <h2 className="text-xs font-semibold text-slate-500 hidden sm:block">
-			  PANEL<span className="text-emerald-400 font-bold">ADMIN</span>
-			</h2>
+              PANEL<span className="text-emerald-400 font-bold">ADMIN</span>
+            </h2>
           </div>
 
           <Link
@@ -218,7 +279,10 @@ export function AdminLayout() {
       <ConfirmDialog
         isOpen={confirmLogout}
         onClose={() => setConfirmLogout(false)}
-        onConfirm={() => { logout(); navigate('/admin/login'); }}
+        onConfirm={() => {
+          logout();
+          navigate("/admin/login");
+        }}
         title="Akhiri Sesi?"
         message="Anda akan keluar dari panel kontrol."
         type="warning"
