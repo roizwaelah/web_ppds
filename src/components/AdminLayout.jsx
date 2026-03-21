@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { getAdminAccess } from '../lib/adminAccess';
 import { ConfirmDialog } from '../components/ui/Dialog';
 import {
   LayoutDashboard, FileText, Target, Users, LogOut, Menu, X,
@@ -20,20 +21,16 @@ export function AdminLayout() {
   const isParentActive = (children) => children?.some((c) => location.pathname === c.path);
   const toggleMenu = (key) => setExpandedMenus((prev) => ({ ...prev, [key]: !prev[key] }));
 
-  // Helper role check
-  const level = user?.level || 0;
-  const isSuperAdmin = level >= 10;
-  const isAdmin = level >= 5;
-  const isEditor = level >= 1;
+  const access = getAdminAccess(user?.level);
 
   const sidebarItems = [
-    ...(isSuperAdmin || isAdmin ? [
+    ...(access.canAccessDashboard ? [
       { label: 'Dashboard', path: '/admin', icon: LayoutDashboard },
     ] : []),
-    ...(isSuperAdmin || isAdmin || isEditor ? [
+    ...(access.canAccessMedia ? [
       { label: 'Media', path: '/admin/media', icon: Image },
     ] : []),
-    ...(isSuperAdmin || isAdmin ? [
+    ...(access.canAccessHeroSlides ? [
       { label: 'Hero Slide', path: '/admin/hero-slides', icon: Image },
       {
         label: 'Profil Pondok',
@@ -48,16 +45,18 @@ export function AdminLayout() {
       { label: 'Pendidikan', path: '/admin/pendidikan', icon: GraduationCap },
     ] : []),
 
-    ...(isSuperAdmin || isAdmin || isEditor ? [
+    ...(access.canAccessPojokSantri ? [
       { label: 'Pojok Santri', path: '/admin/pojok-santri', icon: BookOpen },
+    ] : []),
+    ...(access.canAccessPengumuman ? [
       { label: 'Pengumuman', path: '/admin/pengumuman', icon: Megaphone },
     ] : []),
 
-    ...(isSuperAdmin || isAdmin ? [
+    ...(access.canAccessPendaftaran ? [
       { label: 'Pendaftaran', path: '/admin/pendaftaran', icon: ClipboardList },
     ] : []),
 
-    ...(isSuperAdmin ? [
+    ...(access.canAccessUsers ? [
       { label: 'Manajemen User', path: '/admin/users', icon: Shield },
     ] : []),
   ];

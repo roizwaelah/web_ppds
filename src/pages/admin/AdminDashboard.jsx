@@ -1,6 +1,7 @@
 import { useAuth } from '../../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import { useData } from '../../contexts/DataContext';
+import { getAdminAccess } from '../../lib/adminAccess';
 import { 
   Users, FileText, Megaphone, Image, GraduationCap, 
   BookOpen, ClipboardList, ArrowRight, LayoutDashboard,
@@ -11,6 +12,7 @@ export function AdminDashboard() {
   const { user } = useAuth();
 
   const { pengasuh, pojokSantri, pengumuman, heroSlides } = useData();
+  const access = getAdminAccess(user?.level);
 
   const stats = [
     { label: 'Hero Slides', value: heroSlides.length, icon: Image, color: 'bg-indigo-50 text-indigo-600', link: '/admin/hero-slides' },
@@ -20,13 +22,13 @@ export function AdminDashboard() {
   ];
 
   const quickLinks = [
-    { label: 'Hero Slides', desc: 'Banner utama', icon: Image, path: '/admin/hero-slides', color: 'text-indigo-600 bg-indigo-50' },
-    { label: 'Sekilas Pandang', desc: 'Profil utama', icon: FileText, path: '/admin/profil/sekilas-pandang', color: 'text-blue-600 bg-blue-50' },
-    { label: 'Pendidikan', desc: 'Program belajar', icon: GraduationCap, path: '/admin/pendidikan', color: 'text-emerald-600 bg-emerald-50' },
-    { label: 'Pojok Santri', desc: 'Kelola artikel', icon: BookOpen, path: '/admin/pojok-santri', color: 'text-amber-600 bg-amber-50' },
-    { label: 'Pengumuman', desc: 'Update info', icon: Megaphone, path: '/admin/pengumuman', color: 'text-purple-600 bg-purple-50' },
-    { label: 'Media', desc: 'Folder uploads', icon: Image, path: '/admin/media', color: 'text-cyan-600 bg-cyan-50' },
-    { label: 'Pendaftaran', desc: 'Info PSB', icon: ClipboardList, path: '/admin/pendaftaran', color: 'text-rose-600 bg-rose-50' },
+    ...(access.canAccessHeroSlides ? [{ label: 'Hero Slides', desc: 'Banner utama', icon: Image, path: '/admin/hero-slides', color: 'text-indigo-600 bg-indigo-50' }] : []),
+    ...(access.canAccessProfile ? [{ label: 'Sekilas Pandang', desc: 'Profil utama', icon: FileText, path: '/admin/profil/sekilas-pandang', color: 'text-blue-600 bg-blue-50' }] : []),
+    ...(access.canAccessPendidikan ? [{ label: 'Pendidikan', desc: 'Program belajar', icon: GraduationCap, path: '/admin/pendidikan', color: 'text-emerald-600 bg-emerald-50' }] : []),
+    ...(access.canAccessPojokSantri ? [{ label: 'Pojok Santri', desc: 'Kelola artikel', icon: BookOpen, path: '/admin/pojok-santri', color: 'text-amber-600 bg-amber-50' }] : []),
+    ...(access.canAccessPengumuman ? [{ label: 'Pengumuman', desc: 'Update info', icon: Megaphone, path: '/admin/pengumuman', color: 'text-purple-600 bg-purple-50' }] : []),
+    ...(access.canAccessMedia ? [{ label: 'Media', desc: 'Folder uploads', icon: Image, path: '/admin/media', color: 'text-cyan-600 bg-cyan-50' }] : []),
+    ...(access.canAccessPendaftaran ? [{ label: 'Pendaftaran', desc: 'Info PSB', icon: ClipboardList, path: '/admin/pendaftaran', color: 'text-rose-600 bg-rose-50' }] : []),
   ];
 
   return (

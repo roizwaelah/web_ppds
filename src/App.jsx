@@ -105,18 +105,74 @@ export function App() {
                 }
               >
                 <Route index element={<AdminDashboard />} />
-                <Route path="hero-slides" element={<AdminHeroSlides />} />
-                <Route path="profil/sekilas-pandang" element={<AdminSekilasPandang />} />
-                <Route path="profil/visi-misi" element={<AdminVisiMisi />} />
-                <Route path="profil/pengasuh" element={<AdminPengasuh />} />
-                <Route path="pendidikan" element={<AdminPendidikan />} />
-                <Route path="pojok-santri" element={<AdminPojokSantri />} />
-                <Route path="pengumuman" element={<AdminPengumuman />} />
-                <Route path="pendaftaran" element={<AdminPendaftaran />} />
+                <Route
+                  path="hero-slides"
+                  element={
+                    <RequireLevel minLevel={5}>
+                      <AdminHeroSlides />
+                    </RequireLevel>
+                  }
+                />
+                <Route
+                  path="profil/sekilas-pandang"
+                  element={
+                    <RequireLevel minLevel={5}>
+                      <AdminSekilasPandang />
+                    </RequireLevel>
+                  }
+                />
+                <Route
+                  path="profil/visi-misi"
+                  element={
+                    <RequireLevel minLevel={5}>
+                      <AdminVisiMisi />
+                    </RequireLevel>
+                  }
+                />
+                <Route
+                  path="profil/pengasuh"
+                  element={
+                    <RequireLevel minLevel={5}>
+                      <AdminPengasuh />
+                    </RequireLevel>
+                  }
+                />
+                <Route
+                  path="pendidikan"
+                  element={
+                    <RequireLevel minLevel={5}>
+                      <AdminPendidikan />
+                    </RequireLevel>
+                  }
+                />
+                <Route
+                  path="pojok-santri"
+                  element={
+                    <RequireLevel minLevel={1}>
+                      <AdminPojokSantri />
+                    </RequireLevel>
+                  }
+                />
+                <Route
+                  path="pengumuman"
+                  element={
+                    <RequireLevel minLevel={1}>
+                      <AdminPengumuman />
+                    </RequireLevel>
+                  }
+                />
+                <Route
+                  path="pendaftaran"
+                  element={
+                    <RequireLevel minLevel={5}>
+                      <AdminPendaftaran />
+                    </RequireLevel>
+                  }
+                />
                 <Route
                   path="media"
                   element={
-                    <RequireLevel minLevel={5}>
+                    <RequireLevel minLevel={1}>
                       <AdminMedia />
                     </RequireLevel>
                   }
