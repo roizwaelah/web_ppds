@@ -110,7 +110,7 @@ export function AdminMedia() {
             </div>
             Media Uploads
           </h1>
-          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.15em] mt-1">
+          <p className="text-[10px] text-slate-500 font-bold uppercase mt-1">
             Kelola gambar yang tersimpan di folder uploads
           </p>
         </div>
@@ -184,10 +184,10 @@ export function AdminMedia() {
           <p className="text-xs text-slate-500 mt-1">Upload gambar baru atau ubah kata kunci pencarian Anda.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-4">
           {filteredItems.map((item) => (
             <div key={item.name} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm group">
-              <div className="aspect-[4/3] bg-slate-100 overflow-hidden">
+              <div className="aspect-4/3 bg-slate-100 overflow-hidden">
                 <img src={item.url} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
               </div>
 
@@ -201,14 +201,14 @@ export function AdminMedia() {
                   <button
                     type="button"
                     onClick={() => handleCopy(item.url)}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest border border-slate-200 hover:border-emerald-200 hover:text-emerald-600 transition-all"
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-[10px] font-bold uppercase border border-slate-200 hover:border-emerald-200 hover:text-emerald-600 transition-all"
                   >
                     <Copy size={13} /> Copy URL
                   </button>
                   <button
                     type="button"
                     onClick={() => setDeleteTarget(item)}
-                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest bg-red-50 text-red-600 hover:bg-red-100 transition-all"
+                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-[10px] font-bold uppercase bg-red-50 text-red-600 hover:bg-red-100 transition-all"
                   >
                     <Trash2 size={13} /> Hapus
                   </button>
