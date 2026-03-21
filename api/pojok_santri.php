@@ -146,9 +146,9 @@ switch ($method) {
 
         $statusColumnExists = hasStatusColumn($pdo);
 
-        // Jika request selain published => wajib admin
+        // Jika request selain published => minimal editor
         if ($statusFilter !== 'published') {
-            requireAdmin();
+            requireEditor();
         }
 
         // Detail by ID
@@ -233,10 +233,10 @@ switch ($method) {
     case 'POST':
 
         $authUser = getAuthUser();
-        $isAdmin = (bool)$authUser;
+        $isEditor = (bool)$authUser;
 
         // Submit publik dibatasi agar tidak jadi spam endpoint.
-        if (!$isAdmin) {
+        if (!$isEditor) {
             applyPublicSubmissionRateLimit(5, 600);
         }
 
@@ -272,11 +272,11 @@ switch ($method) {
             jsonError('Judul, isi, dan nama penulis wajib diisi', 422);
         }
 
-        if ($isAdmin) {
-            requireAdmin();
+        if ($isEditor) {
+            requireEditor();
         }
 
-        $status = $isAdmin && in_array($input['status'] ?? '', $allowedStatus, true)
+        $status = $isEditor && in_array($input['status'] ?? '', $allowedStatus, true)
             ? $input['status']
             : 'draft';
 
@@ -292,8 +292,8 @@ switch ($method) {
                 $content,
                 $author,
                 $authorRole,
-                $isAdmin ? ($input['date'] ?? date('Y-m-d')) : date('Y-m-d'),
-                $isAdmin ? sanitizeUrl($input['image'] ?? '') : '',
+                $isEditor ? ($input['date'] ?? date('Y-m-d')) : date('Y-m-d'),
+                $isEditor ? sanitizeUrl($input['image'] ?? '') : '',
                 $category,
                 $status
             ]);
@@ -309,8 +309,8 @@ switch ($method) {
                 $content,
                 $author,
                 $authorRole,
-                $isAdmin ? ($input['date'] ?? date('Y-m-d')) : date('Y-m-d'),
-                $isAdmin ? sanitizeUrl($input['image'] ?? '') : '',
+                $isEditor ? ($input['date'] ?? date('Y-m-d')) : date('Y-m-d'),
+                $isEditor ? sanitizeUrl($input['image'] ?? '') : '',
                 $category
             ]);
         }
@@ -328,7 +328,7 @@ switch ($method) {
 
     case 'PUT':
 
-        requireAdmin();
+        requireEditor();
 
         if (!$id) {
             jsonError('ID is required', 400);
@@ -418,7 +418,7 @@ switch ($method) {
 
     case 'DELETE':
 
-        requireAdmin();
+        requireEditor();
 
         if (!$id) {
             jsonError('ID is required', 400);

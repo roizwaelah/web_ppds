@@ -1,12 +1,18 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 
 const NotificationContext = createContext();
+let toastCounter = 0;
+
+const createToastId = () => {
+  toastCounter += 1;
+  return `toast-${Date.now()}-${toastCounter}`;
+};
 
 export function NotificationProvider({ children }) {
   const [toasts, setToasts] = useState([]);
 
   const showToast = useCallback((message, type = 'success', duration = 3000) => {
-    const id = Date.now();
+    const id = createToastId();
     setToasts((prev) => [...prev, { id, message, type }]);
 
     setTimeout(() => {
