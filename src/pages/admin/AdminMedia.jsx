@@ -184,10 +184,10 @@ export function AdminMedia() {
           <p className="text-xs text-slate-500 mt-1">Upload gambar baru atau ubah kata kunci pencarian Anda.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-4">
           {filteredItems.map((item) => (
             <div key={item.name} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm group">
-              <div className="relative aspect-[4/3] bg-slate-100 overflow-hidden">
+              <div className="relative aspect-4/3 bg-slate-100 overflow-hidden">
                 <img src={item.url} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                 <div className="absolute inset-x-0 top-0 flex justify-end gap-2 p-3 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                   <button
