@@ -12,21 +12,7 @@ if ($method !== 'GET') {
 
 function sanitizeUrl($url)
 {
-    $url = trim($url);
-
-    if ($url === '') return '';
-
-    // Relative path
-    if (preg_match('#^/uploads/#', $url)) {
-        return $url;
-    }
-
-    // Absolute URL
-    if (filter_var($url, FILTER_VALIDATE_URL)) {
-        return $url;
-    }
-
-    return '';
+    return sanitizeUrlOrUploadPath($url);
 }
 
 function sanitizeArray($value)
