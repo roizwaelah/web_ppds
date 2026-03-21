@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-import { CheckCircle2, Clock3, MessageSquare, Trash2, XCircle } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { CheckCircle2, Clock3, CornerDownRight, MessageSquare, Search, Trash2, XCircle } from 'lucide-react';
 import { useNotification } from '../../contexts/NotificationContext';
 import { ConfirmDialog } from '../../components/ui/Dialog';
 import { deletePojokSantriCommentApi, getPojokSantriComments, updatePojokSantriCommentStatusApi } from '../../lib/api';
@@ -28,6 +28,7 @@ export function AdminKomentar() {
   const [summary, setSummary] = useState({ pending: 0, approved: 0, rejected: 0 });
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState('pending');
+  const [search, setSearch] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, id: null });
 
   const loadComments = useCallback(async (selectedStatus = status) => {
@@ -46,6 +47,17 @@ export function AdminKomentar() {
   useEffect(() => {
     loadComments(status);
   }, [loadComments, status]);
+
+  const filteredComments = useMemo(() => {
+    const keyword = search.trim().toLowerCase();
+    if (!keyword) return comments;
+
+    return comments.filter((item) =>
+      [item.commenter_name, item.parent_commenter_name, item.commenter_email, item.comment, item.article_title]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(keyword))
+    );
+  }, [comments, search]);
 
   const handleStatusChange = async (id, nextStatus) => {
     try {
@@ -78,7 +90,7 @@ export function AdminKomentar() {
             Komentar
           </h1>
           <p className="text-slate-500 font-medium text-xs sm:text-sm mt-0.5">
-            Moderasi komentar dari halaman detail Pojok Santri.
+            Moderasi komentar dan balasan dari halaman detail Pojok Santri.
           </p>
         </div>
 
@@ -94,15 +106,28 @@ export function AdminKomentar() {
               <button
                 key={item.key}
                 onClick={() => setStatus(item.key)}
-                className={`rounded-2xl border px-2 text-left transition ${isActive ? 'border-emerald-500 bg-emerald-50 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300'}`}
+                className={`rounded-2xl border px-4 py-3 text-left transition ${isActive ? 'border-emerald-500 bg-emerald-50 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300'}`}
               >
                 <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
                   <Icon size={16} className={isActive ? 'text-emerald-600' : 'text-slate-400'} /> {item.label}
                 </div>
-                <p className="mt-1 text-sm font-black text-center text-slate-900">{summary[item.key] ?? 0}</p>
+                <p className="mt-2 text-2xl font-black text-slate-900">{summary[item.key] ?? 0}</p>
               </button>
             );
           })}
+        </div>
+      </div>
+
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5">
+        <div className="relative max-w-md">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Cari nama, email, isi komentar, balasan, atau judul artikel"
+            className="w-full rounded-xl border border-slate-300 pl-10 pr-4 py-2.5 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none"
+          />
         </div>
       </div>
 
@@ -113,14 +138,15 @@ export function AdminKomentar() {
           </div>
         )}
 
-        {!loading && comments.length === 0 && (
+        {!loading && filteredComments.length === 0 && (
           <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
             Belum ada komentar pada status ini.
           </div>
         )}
 
-        {!loading && comments.map((comment) => {
+        {!loading && filteredComments.map((comment) => {
           const meta = STATUS_META[comment.status] || STATUS_META.pending;
+          const isReply = Boolean(comment.parent_id);
 
           return (
             <div key={comment.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -130,6 +156,11 @@ export function AdminKomentar() {
                     <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${meta.badge}`}>
                       {meta.label}
                     </span>
+                    {isReply && (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
+                        <CornerDownRight size={14} /> Balasan
+                      </span>
+                    )}
                     <span className="text-xs text-slate-500">{formatDateTime(comment.created_at)}</span>
                   </div>
 
@@ -137,6 +168,12 @@ export function AdminKomentar() {
                     <p className="text-sm font-bold text-slate-900">{comment.commenter_name}</p>
                     <p className="text-xs text-slate-500 break-all">{comment.commenter_email || 'Tanpa email'}</p>
                   </div>
+
+                  {isReply && (
+                    <div className="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                      Membalas komentar <span className="font-semibold">{comment.parent_commenter_name || `#${comment.parent_id}`}</span>
+                    </div>
+                  )}
 
                   <div className="rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
                     <p className="text-sm whitespace-pre-line leading-6 text-slate-700">{comment.comment}</p>
@@ -191,7 +228,7 @@ export function AdminKomentar() {
         onClose={() => setDeleteConfirm({ isOpen: false, id: null })}
         onConfirm={handleDelete}
         title="Hapus komentar"
-        message="Komentar yang dihapus tidak bisa dikembalikan. Lanjutkan?"
+        message="Komentar atau balasan yang dihapus tidak bisa dikembalikan. Lanjutkan?"
         confirmText="Hapus"
         confirmVariant="danger"
       />

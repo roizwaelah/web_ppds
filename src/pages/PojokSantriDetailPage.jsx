@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Calendar, User, Clock3, Link2, Check, MessageCircle, Download, Send, MessagesSquare } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Clock3, Link2, Check, MessageCircle, Download, Send, MessagesSquare, CornerDownRight, X } from 'lucide-react';
 import { PublicLayout } from '../components/PublicLayout';
 import { useData } from '../contexts/DataContext';
 import { PublicRichTextRenderer } from '../components/ui/PublicRichTextRenderer';
@@ -52,12 +52,55 @@ function estimateReadTime(content = '') {
   return `${minutes} menit baca`;
 }
 
-function WhatsAppIcon(props) {
+function countAllComments(items = []) {
+  return items.reduce((total, item) => total + 1 + countAllComments(item.replies || []), 0);
+}
+
+function findCommentById(items = [], targetId) {
+  for (const item of items) {
+    if (String(item.id) === String(targetId)) return item;
+    const nested = findCommentById(item.replies || [], targetId);
+    if (nested) return nested;
+  }
+  return null;
+}
+
+function CommentCard({ item, level = 0, onReply }) {
   return (
-    <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true" {...props}>
-      <path d="M19.11 17.21c-.27-.13-1.6-.79-1.85-.88-.25-.09-.43-.13-.61.13-.18.27-.7.88-.86 1.06-.16.18-.31.2-.58.07-.27-.13-1.13-.42-2.15-1.33-.8-.71-1.34-1.59-1.5-1.86-.16-.27-.02-.41.11-.54.12-.12.27-.31.4-.47.13-.16.18-.27.27-.45.09-.18.04-.34-.02-.47-.07-.13-.61-1.48-.84-2.03-.22-.53-.44-.46-.61-.47l-.52-.01c-.18 0-.47.07-.72.34-.25.27-.95.93-.95 2.27 0 1.34.98 2.64 1.11 2.82.13.18 1.91 2.92 4.62 4.1.64.28 1.14.45 1.53.58.64.2 1.22.17 1.68.1.51-.08 1.6-.65 1.82-1.28.22-.62.22-1.16.16-1.28-.07-.12-.25-.2-.52-.33Z" />
-      <path d="M16.01 3.2c-7.07 0-12.8 5.73-12.8 12.8 0 2.25.58 4.37 1.6 6.22L3.2 28.8l6.76-1.57a12.75 12.75 0 0 0 6.05 1.53h.01c7.07 0 12.8-5.73 12.8-12.8 0-3.43-1.34-6.65-3.77-9.08A12.7 12.7 0 0 0 16.01 3.2Zm0 23.4h-.01c-1.89 0-3.74-.51-5.36-1.47l-.38-.23-4.01.93.96-3.91-.25-.4a10.58 10.58 0 0 1-1.63-5.63c0-5.87 4.78-10.65 10.66-10.65 2.84 0 5.5 1.1 7.51 3.11a10.54 10.54 0 0 1 3.12 7.53c0 5.88-4.78 10.66-10.65 10.66Z" />
-    </svg>
+    <article className={`rounded-2xl border border-slate-200 bg-white p-5 shadow-sm ${level > 0 ? 'ml-0 md:ml-8 mt-4' : ''}`}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-sm font-bold text-slate-900">{item.commenter_name}</p>
+          <p className="text-xs text-slate-500">{formatDateTime(item.created_at)}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          {level > 0 && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-600">
+              <CornerDownRight size={12} /> Balasan
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={() => onReply(item)}
+            className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-700 hover:bg-emerald-100"
+          >
+            <MessageCircle size={12} /> Balas
+          </button>
+        </div>
+      </div>
+      {item.parent_commenter_name && (
+        <p className="mt-3 text-xs font-semibold text-slate-500">Membalas {item.parent_commenter_name}</p>
+      )}
+      <p className="mt-4 whitespace-pre-line text-sm leading-7 text-slate-700">{item.comment}</p>
+
+      {Array.isArray(item.replies) && item.replies.length > 0 && (
+        <div className="mt-4 border-l border-slate-200 pl-0 md:pl-2">
+          {item.replies.map((reply) => (
+            <CommentCard key={reply.id} item={reply} level={level + 1} onReply={onReply} />
+          ))}
+        </div>
+      )}
+    </article>
   );
 }
 
@@ -71,6 +114,7 @@ export function PojokSantriDetailPage() {
   const [commentError, setCommentError] = useState('');
   const [submittingComment, setSubmittingComment] = useState(false);
   const [commentSuccess, setCommentSuccess] = useState('');
+  const [replyTargetId, setReplyTargetId] = useState(null);
   const [commentForm, setCommentForm] = useState({ name: '', email: '', comment: '' });
 
   const publishedList = useMemo(() => {
@@ -87,6 +131,9 @@ export function PojokSantriDetailPage() {
     () => publishedList.filter((item) => String(item.id) !== String(id)).slice(0, 6),
     [publishedList, id]
   );
+
+  const totalComments = useMemo(() => countAllComments(comments), [comments]);
+  const replyTarget = useMemo(() => findCommentById(comments, replyTargetId), [comments, replyTargetId]);
 
   useEffect(() => {
     let active = true;
@@ -197,6 +244,32 @@ export function PojokSantriDetailPage() {
     }
   };
 
+  const handleCommentSubmit = async (event) => {
+    event.preventDefault();
+    setCommentSuccess('');
+    setCommentError('');
+
+    try {
+      setSubmittingComment(true);
+      await createPojokSantriComment({
+        articleId: Number(id),
+        parentId: replyTargetId ? Number(replyTargetId) : null,
+        name: commentForm.name,
+        email: commentForm.email,
+        comment: commentForm.comment,
+      });
+      setCommentForm({ name: '', email: '', comment: '' });
+      setReplyTargetId(null);
+      setCommentSuccess(replyTargetId
+        ? 'Balasan berhasil dikirim dan akan tampil setelah disetujui admin.'
+        : 'Komentar berhasil dikirim dan akan tampil setelah disetujui admin.');
+    } catch (error) {
+      setCommentError(error.message || 'Gagal mengirim komentar');
+    } finally {
+      setSubmittingComment(false);
+    }
+  };
+
   if (!pojokSantri) {
     return (
       <PublicLayout>
@@ -268,14 +341,37 @@ export function PojokSantriDetailPage() {
                 <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-emerald-700">Diskusi</p>
                 <h2 className="mt-1 text-xl font-black text-slate-900 flex items-center gap-2">
                   <MessagesSquare className="text-emerald-600" size={20} />
-                  Komentar ({comments.length})
+                  Komentar ({totalComments})
                 </h2>
               </div>
-              <p className="text-xs text-slate-500 max-w-sm">Komentar baru akan tampil setelah melalui moderasi admin untuk menjaga diskusi tetap sehat.</p>
+              <p className="text-xs text-slate-500 max-w-sm">Komentar dan balasan baru akan tampil setelah melalui moderasi admin untuk menjaga diskusi tetap sehat.</p>
             </div>
 
             <div className="p-5 md:p-6 space-y-6">
               <form onSubmit={handleCommentSubmit} className="rounded-2xl border border-slate-200 bg-slate-50 p-4 md:p-5 space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-bold text-slate-900">{replyTarget ? 'Balas komentar' : 'Tulis komentar'}</p>
+                    <p className="text-xs text-slate-500">{replyTarget ? `Balasan akan diarahkan ke ${replyTarget.commenter_name}.` : 'Isi form di bawah untuk ikut berdiskusi.'}</p>
+                  </div>
+                  {replyTarget && (
+                    <button
+                      type="button"
+                      onClick={() => setReplyTargetId(null)}
+                      className="inline-flex items-center gap-1 rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-white"
+                    >
+                      <X size={14} /> Batal balas
+                    </button>
+                  )}
+                </div>
+
+                {replyTarget && (
+                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                    <p className="font-semibold">Membalas komentar {replyTarget.commenter_name}</p>
+                    <p className="mt-1 line-clamp-2 text-emerald-700">{replyTarget.comment}</p>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1.5">Nama *</label>
@@ -303,12 +399,12 @@ export function PojokSantriDetailPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Komentar *</label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">{replyTarget ? 'Balasan *' : 'Komentar *'}</label>
                   <textarea
                     value={commentForm.comment}
                     onChange={(e) => setCommentForm((prev) => ({ ...prev, comment: e.target.value }))}
                     className="w-full min-h-32 rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                    placeholder="Tulis tanggapan atau pertanyaan Anda terkait artikel ini"
+                    placeholder={replyTarget ? 'Tulis balasan Anda untuk komentar ini' : 'Tulis tanggapan atau pertanyaan Anda terkait artikel ini'}
                     maxLength={1500}
                     required
                   />
@@ -324,7 +420,7 @@ export function PojokSantriDetailPage() {
                     disabled={submittingComment}
                     className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
                   >
-                    <Send size={16} /> {submittingComment ? 'Mengirim...' : 'Kirim Komentar'}
+                    <Send size={16} /> {submittingComment ? 'Mengirim...' : (replyTarget ? 'Kirim Balasan' : 'Kirim Komentar')}
                   </button>
                 </div>
               </form>
@@ -338,18 +434,7 @@ export function PojokSantriDetailPage() {
                 )}
 
                 {!commentsLoading && comments.map((item) => (
-                  <article key={item.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-bold text-slate-900">{item.commenter_name}</p>
-                        <p className="text-xs text-slate-500">{formatDateTime(item.created_at)}</p>
-                      </div>
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-700">
-                        <MessageCircle size={12} /> Komentar
-                      </span>
-                    </div>
-                    <p className="mt-4 whitespace-pre-line text-sm leading-7 text-slate-700">{item.comment}</p>
-                  </article>
+                  <CommentCard key={item.id} item={item} onReply={(comment) => setReplyTargetId(comment.id)} />
                 ))}
               </div>
             </div>

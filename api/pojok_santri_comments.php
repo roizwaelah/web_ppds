@@ -21,6 +21,7 @@ function ensureCommentsTable(PDO $pdo): void
         "CREATE TABLE IF NOT EXISTS pojok_santri_comments (
             id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             article_id INT NOT NULL,
+            parent_id INT UNSIGNED DEFAULT NULL,
             commenter_name VARCHAR(120) NOT NULL,
             commenter_email VARCHAR(190) DEFAULT NULL,
             comment TEXT NOT NULL,
@@ -28,11 +29,39 @@ function ensureCommentsTable(PDO $pdo): void
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             INDEX idx_article_status_created (article_id, status, created_at),
-            INDEX idx_status_created (status, created_at)
+            INDEX idx_status_created (status, created_at),
+            INDEX idx_parent_id (parent_id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
     );
 
+    $columns = $pdo->query("SHOW COLUMNS FROM pojok_santri_comments LIKE 'parent_id'")->fetchAll(PDO::FETCH_ASSOC);
+    if (count($columns) === 0) {
+        $pdo->exec("ALTER TABLE pojok_santri_comments ADD COLUMN parent_id INT UNSIGNED DEFAULT NULL AFTER article_id");
+        $pdo->exec("ALTER TABLE pojok_santri_comments ADD INDEX idx_parent_id (parent_id)");
+    }
+
     $ensured = true;
+}
+
+function appendReplies(array $comments): array
+{
+    $byParent = [];
+    foreach ($comments as $comment) {
+        $parentKey = (int)($comment['parent_id'] ?? 0);
+        $comment['replies'] = [];
+        $byParent[$parentKey][] = $comment;
+    }
+
+    $build = function ($parentId) use (&$build, &$byParent) {
+        $items = $byParent[$parentId] ?? [];
+        foreach ($items as &$item) {
+            $item['replies'] = $build((int)$item['id']);
+        }
+        unset($item);
+        return $items;
+    };
+
+    return $build(0);
 }
 
 function sanitizeCommentText($text): string
@@ -108,11 +137,12 @@ switch ($method) {
 
         $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 
-        $sql = "SELECT c.*, p.title AS article_title
+        $sql = "SELECT c.*, p.title AS article_title, parent.commenter_name AS parent_commenter_name
                 FROM pojok_santri_comments c
                 LEFT JOIN pojok_santri p ON p.id = c.article_id
+                LEFT JOIN pojok_santri_comments parent ON parent.id = c.parent_id
                 $whereSql
-                ORDER BY c.created_at DESC, c.id DESC";
+                ORDER BY COALESCE(c.parent_id, c.id) DESC, c.parent_id IS NOT NULL ASC, c.created_at ASC, c.id ASC";
 
         if (!$id) {
             $sql .= ' LIMIT ? OFFSET ?';
@@ -150,8 +180,10 @@ switch ($method) {
             }
         }
 
+        $publicRows = $statusFilter === 'approved' ? appendReplies($rows) : $rows;
+
         jsonResponse([
-            'data' => $rows,
+            'data' => $publicRows,
             'total' => $total,
             'page' => $page,
             'limit' => $limit,
@@ -166,6 +198,7 @@ switch ($method) {
         $name = trim(strip_tags((string)($input['name'] ?? '')));
         $email = trim((string)($input['email'] ?? ''));
         $comment = sanitizeCommentText($input['comment'] ?? '');
+        $parentId = max(0, (int)($input['parentId'] ?? 0));
 
         if ($articleId <= 0) {
             jsonError('Artikel tujuan tidak valid', 422);
@@ -203,12 +236,23 @@ switch ($method) {
             jsonError('Artikel tidak ditemukan atau belum dipublikasikan', 404);
         }
 
+        if ($parentId > 0) {
+            $parentStmt = $pdo->prepare('SELECT id, article_id FROM pojok_santri_comments WHERE id = ? LIMIT 1');
+            $parentStmt->execute([$parentId]);
+            $parentComment = $parentStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$parentComment || (int)$parentComment['article_id'] !== $articleId) {
+                jsonError('Komentar yang dibalas tidak valid', 422);
+            }
+        }
+
         $stmt = $pdo->prepare(
-            'INSERT INTO pojok_santri_comments (article_id, commenter_name, commenter_email, comment, status)
-             VALUES (?, ?, ?, ?, ?)' 
+            'INSERT INTO pojok_santri_comments (article_id, parent_id, commenter_name, commenter_email, comment, status)
+             VALUES (?, ?, ?, ?, ?, ?)' 
         );
         $stmt->execute([
             $articleId,
+            $parentId > 0 ? $parentId : null,
             $name,
             $email !== '' ? $email : null,
             $comment,
