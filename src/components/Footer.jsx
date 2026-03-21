@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 export function Footer() {
   return (
-    <footer className="bg-gray-900 text-gray-300">
+    <footer className="bg-gray-900 text-gray-300" aria-label="Informasi footer">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4"> {/* Padding naik dari 12 ke 16 */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12"> {/* Gap naik ke 12 agar tidak rapat */}
           <div className="col-span-1 md:col-span-2">
@@ -38,11 +38,11 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-3">
                 <MessageCircle className="w-5 h-5 shrink-0 text-emerald-500" />
-                <span>081 1263 0731</span>
+                <a href="tel:+628112630731" className="hover:text-emerald-400 transition-colors">081 1263 0731</a>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 shrink-0 text-emerald-500" />
-                <span>ppdarsalcilongok@gmail.com</span>
+                <a href="mailto:ppdarsalcilongok@gmail.com" className="hover:text-emerald-400 transition-colors break-all">ppdarsalcilongok@gmail.com</a>
               </li>
             </ul>
           </div>
