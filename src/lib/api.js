@@ -187,6 +187,31 @@ export const deletePojokSantriApi = (id) =>
     method: 'DELETE',
   });
 
+
+export const getPojokSantriComments = ({ articleId, page = 1, limit = 20, status = 'approved' } = {}) => {
+  const params = new URLSearchParams({ page, limit });
+  if (articleId) params.append('article_id', articleId);
+  if (status) params.append('status', status);
+  return apiFetch(`/api/pojok_santri_comments.php?${params.toString()}`);
+};
+
+export const createPojokSantriComment = (payload) =>
+  apiFetch('/api/pojok_santri_comments.php', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+
+export const updatePojokSantriCommentStatusApi = (id, payload) =>
+  apiFetch(`/api/pojok_santri_comments.php?id=${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+
+export const deletePojokSantriCommentApi = (id) =>
+  apiFetch(`/api/pojok_santri_comments.php?id=${id}`, {
+    method: 'DELETE',
+  });
+
 export const createPengumuman = (payload) =>
   apiFetch('/api/pengumuman.php', {
     method: 'POST',
