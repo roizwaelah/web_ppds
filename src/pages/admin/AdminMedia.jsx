@@ -110,7 +110,7 @@ export function AdminMedia() {
             </div>
             Media Uploads
           </h1>
-          <p className="text-[10px] text-slate-500 font-bold uppercase mt-1">
+          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.15em] mt-1">
             Kelola gambar yang tersimpan di folder uploads
           </p>
         </div>
@@ -184,35 +184,36 @@ export function AdminMedia() {
           <p className="text-xs text-slate-500 mt-1">Upload gambar baru atau ubah kata kunci pencarian Anda.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {filteredItems.map((item) => (
             <div key={item.name} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm group">
-              <div className="aspect-4/3 bg-slate-100 overflow-hidden">
+              <div className="relative aspect-[4/3] bg-slate-100 overflow-hidden">
                 <img src={item.url} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-              </div>
-
-              <div className="p-4 space-y-3">
-                <div>
-                  <p className="text-xs font-bold text-slate-900 truncate" title={item.name}>{item.name}</p>
-                  <p className="text-[10px] text-slate-500 mt-1">{formatBytes(item.size)} • {formatDate(item.modified_at)}</p>
-                </div>
-
-                <div className="flex items-center gap-2">
+                <div className="absolute inset-x-0 top-0 flex justify-end gap-2 p-3 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                   <button
                     type="button"
                     onClick={() => handleCopy(item.url)}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-[10px] font-bold uppercase border border-slate-200 hover:border-emerald-200 hover:text-emerald-600 transition-all"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-slate-700 shadow-lg transition hover:bg-white hover:text-emerald-600"
+                    aria-label={`Copy URL ${item.name}`}
+                    title="Copy URL"
                   >
-                    <Copy size={13} /> Copy URL
+                    <Copy size={15} />
                   </button>
                   <button
                     type="button"
                     onClick={() => setDeleteTarget(item)}
-                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-[10px] font-bold uppercase bg-red-50 text-red-600 hover:bg-red-100 transition-all"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-red-500 shadow-lg transition hover:bg-white hover:text-red-600"
+                    aria-label={`Hapus ${item.name}`}
+                    title="Hapus gambar"
                   >
-                    <Trash2 size={13} /> Hapus
+                    <Trash2 size={15} />
                   </button>
                 </div>
+              </div>
+
+              <div className="p-4">
+                <p className="text-xs font-bold text-slate-900 truncate" title={item.name}>{item.name}</p>
+                <p className="text-[10px] text-slate-500 mt-1">{formatBytes(item.size)} • {formatDate(item.modified_at)}</p>
               </div>
             </div>
           ))}
