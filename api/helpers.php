@@ -3,13 +3,19 @@
 @ini_set('expose_php', '0');
 if (function_exists('header_remove')) {
     @header_remove('X-Powered-By');
+    @header_remove('Server');
 }
 
 // ===== SECURITY HEADERS =====
 header('Content-Type: application/json; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: DENY');
+header('X-XSS-Protection: 1; mode=block');
 header('Referrer-Policy: no-referrer');
+header("Content-Security-Policy: default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'");
+if (!empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off') {
+    header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+}
 
 // ===== CORS WHITELIST =====
 $allowedOrigins = [
@@ -19,18 +25,19 @@ $allowedOrigins = [
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
-if (in_array($origin, $allowedOrigins)) {
+if (in_array($origin, $allowedOrigins, true)) {
     header("Access-Control-Allow-Origin: $origin");
 }
 
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization, X-CSRF-Token');
+header('Allow: GET, POST, PUT, DELETE, OPTIONS');
 header('Vary: Origin');
 header('Access-Control-Allow-Credentials: true');
 
 // Handle preflight
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
+    http_response_code(204);
     exit;
 }
 

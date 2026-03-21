@@ -6,8 +6,12 @@ ServerSignature Off
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
-  # Block access to hidden files/directories except the ACME challenge path.
-  RewriteRule "(^|/)\." - [F,L]
+  # Block access to hidden files/directories except the ACME and security.txt well-known paths.
+  RewriteRule "(^|/)\.(?!well-known(?:/|$))" - [F,L]
+
+  # Reject OPTIONS outside the API to reduce attack surface.
+  RewriteCond %{REQUEST_METHOD} =OPTIONS
+  RewriteRule !^api(?:/|$) - [R=405,L]
 
   # Send existing files/directories directly.
   RewriteCond %{REQUEST_FILENAME} -f [OR]
@@ -30,12 +34,16 @@ ServerSignature Off
   Require all denied
 </FilesMatch>
 
-# Disable MIME sniffing and clickjacking, keep a strict referrer policy.
+# Security headers for the SPA and static assets.
 <IfModule mod_headers.c>
+  Header always unset Server
   Header always set X-Content-Type-Options "nosniff"
   Header always set X-Frame-Options "SAMEORIGIN"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set X-XSS-Protection "1; mode=block"
   Header always set Permissions-Policy "accelerometer=(), autoplay=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" env=HTTPS
+  Header always set Content-Security-Policy "default-src 'self'; base-uri 'self'; connect-src 'self'; font-src 'self' data:; img-src 'self' data: blob:; object-src 'none'; script-src 'self'; style-src 'self'; frame-ancestors 'self'; form-action 'self'; upgrade-insecure-requests"
 
   <FilesMatch "\.(?:html?|js|mjs|css|json|svg|xml)$">
     Header always set Cache-Control "public, max-age=3600"
@@ -55,4 +63,10 @@ ServerSignature Off
 <IfModule mod_mime.c>
   AddType application/javascript .js .mjs
   AddType image/webp .webp
+</IfModule>
+
+<IfModule mod_allowmethods.c>
+  <LimitExcept GET POST PUT DELETE HEAD OPTIONS>
+    Require all denied
+  </LimitExcept>
 </IfModule>
