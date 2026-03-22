@@ -33,9 +33,14 @@ const STATUS_META = {
   },
 };
 
-const STATUS_OPTIONS = ['pending', 'approved', 'rejected'];
+const STATUS_OPTIONS = ['all', 'pending', 'approved', 'rejected'];
 
 const ACTION_META = {
+  reply: {
+    label: 'Balas',
+    icon: MessageSquare,
+    className: 'text-sky-700 hover:text-sky-800',
+  },
   approved: {
     label: 'Setujui',
     icon: CheckCircle2,
@@ -77,10 +82,10 @@ function StatusBadge({ status }) {
   );
 }
 
-function CommentRow({ comment, onStatusChange, onDelete }) {
+function CommentRow({ comment, onReply, onStatusChange, onDelete }) {
   const meta = STATUS_META[comment.status] || STATUS_META.pending;
   const isReply = Boolean(comment.parent_id);
-  const actions = STATUS_OPTIONS.filter((item) => item !== comment.status);
+  const actions = STATUS_OPTIONS.filter((item) => item !== 'all' && item !== comment.status);
 
   return (
     <article className="border-b border-slate-200 bg-white transition hover:bg-slate-50/70 last:border-b-0">
@@ -116,7 +121,15 @@ function CommentRow({ comment, onStatusChange, onDelete }) {
           </div>
 
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs font-semibold">
-            {actions.map((actionKey, index) => {
+            <button
+              onClick={() => onReply(comment)}
+              className={`inline-flex items-center gap-1.5 transition ${ACTION_META.reply.className}`}
+            >
+              <MessageSquare size={14} />
+              {ACTION_META.reply.label}
+            </button>
+            <span className="text-slate-300">|</span>
+            {actions.map((actionKey) => {
               const action = ACTION_META[actionKey];
               const Icon = action.icon;
 
@@ -129,11 +142,10 @@ function CommentRow({ comment, onStatusChange, onDelete }) {
                     <Icon size={14} />
                     {action.label}
                   </button>
-                  {index < actions.length - 1 && <span className="text-slate-300">|</span>}
+                  <span className="text-slate-300">|</span>
                 </div>
               );
             })}
-            {actions.length > 0 && <span className="text-slate-300">|</span>}
             <button
               onClick={() => onDelete(comment.id)}
               className="inline-flex items-center gap-1.5 text-rose-700 transition hover:text-rose-800"
@@ -177,7 +189,7 @@ export function AdminKomentar() {
   const [status, setStatus] = useState('pending');
   const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, id: null });
 
-  const currentStatusMeta = STATUS_META[status] || STATUS_META.pending;
+  const currentStatusMeta = status === 'all' ? { label: 'Semua' } : (STATUS_META[status] || STATUS_META.pending);
   const totalComments = useMemo(
     () => STATUS_OPTIONS.reduce((total, item) => total + (summary[item] ?? 0), 0),
     [summary],
@@ -186,7 +198,7 @@ export function AdminKomentar() {
   const loadComments = useCallback(async (selectedStatus = status) => {
     try {
       setLoading(true);
-      const response = await getPojokSantriComments({ status: selectedStatus, limit: 100 });
+      const response = await getPojokSantriComments({ status: selectedStatus === 'all' ? undefined : selectedStatus, limit: 100 });
       setComments(Array.isArray(response?.data) ? response.data : []);
       setSummary(response?.summary || { pending: 0, approved: 0, rejected: 0 });
     } catch (error) {
@@ -210,6 +222,10 @@ export function AdminKomentar() {
     }
   };
 
+  const handleReply = (comment) => {
+    showToast(`Aksi balas dipilih untuk komentar dari ${comment.commenter_name}`, 'info');
+  };
+
   const handleDelete = async () => {
     try {
       await deletePojokSantriCommentApi(deleteConfirm.id);
@@ -226,32 +242,14 @@ export function AdminKomentar() {
     <div className="space-y-6">
       <section className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-slate-200 bg-gradient-to-r from-emerald-50 via-white to-white px-5 py-5 lg:px-6">
-          <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-            <div>
-              <h1 className="flex items-center gap-2 text-lg font-black tracking-tight text-slate-900">
-                <MessageSquare className="text-emerald-600" />
-                Komentar
-              </h1>
-              <p className="mt-1 text-sm text-slate-500">
-                Moderasi komentar dan balasan dari halaman detail Pojok Santri dengan pola navigasi ala WordPress.
-              </p>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-700">Total</p>
-                <p className="mt-1 text-2xl font-black text-slate-900">{totalComments}</p>
-              </div>
-              {STATUS_OPTIONS.map((item) => {
-                const meta = STATUS_META[item];
-                return (
-                  <div key={item} className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">{meta.label}</p>
-                    <p className="mt-1 text-xl font-black text-slate-900">{summary[item] ?? 0}</p>
-                  </div>
-                );
-              })}
-            </div>
+          <div>
+            <h1 className="flex items-center gap-2 text-lg font-black tracking-tight text-slate-900">
+              <MessageSquare className="text-emerald-600" />
+              Komentar
+            </h1>
+            <p className="mt-1 text-sm text-slate-500">
+              Moderasi komentar dan balasan dari halaman detail Pojok Santri dengan pola navigasi ala WordPress.
+            </p>
           </div>
         </div>
 
@@ -259,7 +257,7 @@ export function AdminKomentar() {
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm font-semibold text-slate-500">
               {STATUS_OPTIONS.map((item, index) => {
-                const meta = STATUS_META[item];
+                const meta = item === 'all' ? { label: 'All' } : STATUS_META[item];
                 const isActive = status === item;
 
                 return (
@@ -268,7 +266,7 @@ export function AdminKomentar() {
                       onClick={() => setStatus(item)}
                       className={`transition ${isActive ? 'text-emerald-700' : 'hover:text-slate-700'}`}
                     >
-                      {meta.label} <span className="text-slate-400">({summary[item] ?? 0})</span>
+                      {meta.label} <span className="text-slate-400">({item === 'all' ? totalComments : (summary[item] ?? 0)})</span>
                     </button>
                     {index < STATUS_OPTIONS.length - 1 && <span className="text-slate-300">|</span>}
                   </div>
@@ -308,6 +306,7 @@ export function AdminKomentar() {
             <CommentRow
               key={comment.id}
               comment={comment}
+              onReply={handleReply}
               onStatusChange={handleStatusChange}
               onDelete={(id) => setDeleteConfirm({ isOpen: true, id })}
             />
