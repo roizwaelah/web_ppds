@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Calendar, User, Clock3, Link2, Check, MessageCircle, Download, Send, MessagesSquare, CornerDownRight, X } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Clock3, Link2, Check, MessageCircle, Download, Send, MessagesSquare, CornerDownRight, MessageCircleIcon, X } from 'lucide-react';
 import { PublicLayout } from '../components/PublicLayout';
 import { useData } from '../contexts/DataContext';
 import { PublicRichTextRenderer } from '../components/ui/PublicRichTextRenderer';
@@ -231,28 +231,6 @@ export function PojokSantriDetailPage() {
       setSubmittingComment(true);
       await createPojokSantriComment({
         articleId: Number(id),
-        name: commentForm.name,
-        email: commentForm.email,
-        comment: commentForm.comment,
-      });
-      setCommentForm({ name: '', email: '', comment: '' });
-      setCommentSuccess('Komentar berhasil dikirim dan akan tampil setelah disetujui admin.');
-    } catch (error) {
-      setCommentError(error.message || 'Gagal mengirim komentar');
-    } finally {
-      setSubmittingComment(false);
-    }
-  };
-
-  const handleCommentSubmit = async (event) => {
-    event.preventDefault();
-    setCommentSuccess('');
-    setCommentError('');
-
-    try {
-      setSubmittingComment(true);
-      await createPojokSantriComment({
-        articleId: Number(id),
         parentId: replyTargetId ? Number(replyTargetId) : null,
         name: commentForm.name,
         email: commentForm.email,
@@ -456,7 +434,7 @@ export function PojokSantriDetailPage() {
                   title="Bagikan ke WhatsApp"
                   className="inline-flex h-11 w-11 items-center justify-center rounded-md bg-[#25D366] text-white hover:bg-[#1fb85a] transition-colors"
                 >
-                  <WhatsAppIcon className="h-[18px] w-[18px]" />
+                  <MessageCircleIcon className="h-[18px] w-[18px]" />
                 </a>
                 <button
                   onClick={handleDownloadPdf}
