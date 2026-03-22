@@ -4,13 +4,21 @@ import {
   Clock3,
   CornerDownRight,
   MessageSquare,
+  Send,
   Trash2,
   UserRound,
+  X,
   XCircle,
 } from 'lucide-react';
 import { useNotification } from '../../contexts/NotificationContext';
-import { ConfirmDialog } from '../../components/ui/Dialog';
-import { deletePojokSantriCommentApi, getPojokSantriComments, updatePojokSantriCommentStatusApi } from '../../lib/api';
+import { useAuth } from '../../contexts/AuthContext';
+import { ConfirmDialog, Modal } from '../../components/ui/Dialog';
+import {
+  createPojokSantriComment,
+  deletePojokSantriCommentApi,
+  getPojokSantriComments,
+  updatePojokSantriCommentStatusApi,
+} from '../../lib/api';
 
 const STATUS_META = {
   pending: {
@@ -34,6 +42,7 @@ const STATUS_META = {
 };
 
 const STATUS_OPTIONS = ['all', 'pending', 'approved', 'rejected'];
+const INITIAL_REPLY_FORM = { name: '', email: '', comment: '' };
 
 const ACTION_META = {
   reply: {
@@ -83,7 +92,6 @@ function StatusBadge({ status }) {
 }
 
 function CommentRow({ comment, onReply, onStatusChange, onDelete }) {
-  const meta = STATUS_META[comment.status] || STATUS_META.pending;
   const isReply = Boolean(comment.parent_id);
   const actions = STATUS_OPTIONS.filter((item) => item !== 'all' && item !== comment.status);
 
@@ -170,11 +178,6 @@ function CommentRow({ comment, onReply, onStatusChange, onDelete }) {
               </p>
             </div>
           )}
-
-          <div className="rounded-2xl border border-dashed border-emerald-200 bg-emerald-50/70 px-4 py-3">
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-700">Ringkasan Status</p>
-            <p className="mt-1 text-sm font-semibold text-slate-700">Komentar ini saat ini berstatus {meta.label.toLowerCase()}.</p>
-          </div>
         </div>
       </div>
     </article>
@@ -183,17 +186,29 @@ function CommentRow({ comment, onReply, onStatusChange, onDelete }) {
 
 export function AdminKomentar() {
   const { showToast } = useNotification();
+  const { user } = useAuth();
   const [comments, setComments] = useState([]);
   const [summary, setSummary] = useState({ pending: 0, approved: 0, rejected: 0 });
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState('pending');
   const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, id: null });
+  const [replyTarget, setReplyTarget] = useState(null);
+  const [replyForm, setReplyForm] = useState(INITIAL_REPLY_FORM);
+  const [submittingReply, setSubmittingReply] = useState(false);
 
   const currentStatusMeta = status === 'all' ? { label: 'Semua' } : (STATUS_META[status] || STATUS_META.pending);
   const totalComments = useMemo(
     () => STATUS_OPTIONS.reduce((total, item) => total + (summary[item] ?? 0), 0),
     [summary],
   );
+
+  const closeReplyModal = useCallback(() => {
+    setReplyTarget(null);
+    setReplyForm({
+      ...INITIAL_REPLY_FORM,
+      name: user?.name || '',
+    });
+  }, [user?.name]);
 
   const loadComments = useCallback(async (selectedStatus = status) => {
     try {
@@ -212,6 +227,10 @@ export function AdminKomentar() {
     loadComments(status);
   }, [loadComments, status]);
 
+  useEffect(() => {
+    setReplyForm((prev) => (prev.name ? prev : { ...prev, name: user?.name || '' }));
+  }, [user?.name]);
+
   const handleStatusChange = async (id, nextStatus) => {
     try {
       await updatePojokSantriCommentStatusApi(id, { status: nextStatus });
@@ -223,7 +242,40 @@ export function AdminKomentar() {
   };
 
   const handleReply = (comment) => {
-    showToast(`Aksi balas dipilih untuk komentar dari ${comment.commenter_name}`, 'info');
+    setReplyTarget(comment);
+    setReplyForm({
+      name: user?.name || '',
+      email: '',
+      comment: '',
+    });
+  };
+
+  const handleReplySubmit = async (event) => {
+    event.preventDefault();
+    if (!replyTarget) return;
+
+    try {
+      setSubmittingReply(true);
+      const response = await createPojokSantriComment({
+        articleId: Number(replyTarget.article_id),
+        parentId: Number(replyTarget.id),
+        name: replyForm.name.trim(),
+        email: replyForm.email.trim(),
+        comment: replyForm.comment.trim(),
+      });
+
+      if (response?.id) {
+        await updatePojokSantriCommentStatusApi(response.id, { status: 'approved' });
+      }
+
+      showToast(`Balasan untuk ${replyTarget.commenter_name} berhasil dikirim`, 'success');
+      closeReplyModal();
+      await loadComments(status);
+    } catch (error) {
+      showToast(error.message || 'Gagal mengirim balasan', 'error');
+    } finally {
+      setSubmittingReply(false);
+    }
   };
 
   const handleDelete = async () => {
@@ -313,6 +365,80 @@ export function AdminKomentar() {
           ))}
         </div>
       </section>
+
+      <Modal
+        isOpen={Boolean(replyTarget)}
+        onClose={closeReplyModal}
+        title={replyTarget ? `Balas komentar ${replyTarget.commenter_name}` : 'Balas komentar'}
+      >
+        {replyTarget && (
+          <form onSubmit={handleReplySubmit} className="space-y-4">
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-700">Komentar asal</p>
+              <p className="mt-2 font-semibold">{replyTarget.commenter_name}</p>
+              <p className="mt-1 whitespace-pre-line text-emerald-700">{replyTarget.comment}</p>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">Nama *</label>
+                <input
+                  type="text"
+                  value={replyForm.name}
+                  onChange={(event) => setReplyForm((prev) => ({ ...prev, name: event.target.value }))}
+                  className="w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                  placeholder="Nama admin"
+                  maxLength={120}
+                  required
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">Email</label>
+                <input
+                  type="email"
+                  value={replyForm.email}
+                  onChange={(event) => setReplyForm((prev) => ({ ...prev, email: event.target.value }))}
+                  className="w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                  placeholder="email@contoh.com"
+                  maxLength={190}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-sm font-semibold text-slate-700">Balasan *</label>
+              <textarea
+                value={replyForm.comment}
+                onChange={(event) => setReplyForm((prev) => ({ ...prev, comment: event.target.value }))}
+                className="min-h-36 w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                placeholder="Tulis balasan admin untuk komentar ini"
+                maxLength={1500}
+                required
+              />
+              <p className="mt-1 text-right text-xs text-slate-500">{replyForm.comment.length}/1500</p>
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={closeReplyModal}
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+              >
+                <X size={16} />
+                Batal
+              </button>
+              <button
+                type="submit"
+                disabled={submittingReply}
+                className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                <Send size={16} />
+                {submittingReply ? 'Mengirim...' : 'Kirim Balasan'}
+              </button>
+            </div>
+          </form>
+        )}
+      </Modal>
 
       <ConfirmDialog
         isOpen={deleteConfirm.isOpen}
