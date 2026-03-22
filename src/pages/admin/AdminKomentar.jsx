@@ -99,15 +99,6 @@ function CommentRow({ comment, onReply, onStatusChange, onDelete }) {
     <article className="border-b border-slate-200 bg-white transition hover:bg-slate-50/70 last:border-b-0">
       <div className="grid gap-4 px-4 py-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,2.6fr)_minmax(220px,1fr)] lg:px-5">
         <div className="min-w-0 space-y-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <StatusBadge status={comment.status} />
-            {isReply && (
-              <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-600">
-                <CornerDownRight size={12} />
-                Balasan
-              </span>
-            )}
-          </div>
 
           <div className="space-y-1.5">
             <div className="flex items-start gap-2 text-sm text-slate-700">
@@ -165,10 +156,7 @@ function CommentRow({ comment, onReply, onStatusChange, onDelete }) {
         </div>
 
         <div className="space-y-3 text-sm text-slate-600">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">Tanggal</p>
-            <p className="mt-1 font-semibold text-slate-800">{formatDateTime(comment.created_at)}</p>
-          </div>
+          <p className="mt-1 font-semibold text-slate-800">{formatDateTime(comment.created_at)}</p>
 
           {isReply && (
             <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
@@ -178,6 +166,15 @@ function CommentRow({ comment, onReply, onStatusChange, onDelete }) {
               </p>
             </div>
           )}
+          <div className="flex flex-wrap items-center gap-2">
+            <StatusBadge status={comment.status} />
+            {isReply && (
+              <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-600">
+                <CornerDownRight size={12} />
+                Balasan
+              </span>
+            )}
+          </div>
         </div>
       </div>
     </article>
@@ -300,7 +297,7 @@ export function AdminKomentar() {
               Komentar
             </h1>
             <p className="mt-1 text-sm text-slate-500">
-              Moderasi komentar dan balasan dari halaman detail Pojok Santri dengan pola navigasi ala WordPress.
+              Moderasi komentar dan balasan dari halaman detail Pojok Santri.
             </p>
           </div>
         </div>
@@ -333,9 +330,9 @@ export function AdminKomentar() {
         </div>
 
         <div className="hidden border-b border-slate-200 bg-slate-50/80 px-5 py-3 lg:grid lg:grid-cols-[minmax(0,1.7fr)_minmax(0,2.6fr)_minmax(220px,1fr)] lg:gap-4 lg:px-6">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Penulis</p>
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Komentar</p>
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Detail</p>
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-800">Penulis</p>
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-800">Komentar</p>
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-800">Detail</p>
         </div>
 
         <div>
