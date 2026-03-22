@@ -8,14 +8,14 @@ import { useNotification } from '../contexts/NotificationContext';
 import { stripHTML } from '../utils/text';
 import { RichTextEditor } from '../components/ui/RichTextEditor';
 
-const FALLBACK_IMAGE = 'https://placehold.co/1200x675?text=Pojok+Santri';
+const FALLBACK_IMAGE = '/images/placeholder.svg';
 
 function toSafeImage(url) {
   if (!url) return FALLBACK_IMAGE;
   const normalized = String(url).trim();
   if (!normalized) return FALLBACK_IMAGE;
 
-  if (/^https?:\/\//i.test(normalized)) return normalized;
+  if (/^https?:\/\//i.test(normalized)) return FALLBACK_IMAGE;
   if (normalized.startsWith('/uploads/')) return normalized;
   if (normalized.startsWith('uploads/')) return `/${normalized}`;
   if (!normalized.includes('/')) return `/uploads/${normalized}`;

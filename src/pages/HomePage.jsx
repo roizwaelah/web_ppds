@@ -8,13 +8,13 @@ import { getArticles } from "../lib/api";
 import { useData } from "../contexts/DataContext";
 import { stripHTML } from "../utils/text";
 
-const FALLBACK_IMAGE = "https://placehold.co/800x600?text=Berita";
+const FALLBACK_IMAGE = "/images/placeholder.svg";
 
 function toSafeImage(url) {
   if (!url) return FALLBACK_IMAGE;
   const normalized = String(url).trim();
   if (!normalized) return FALLBACK_IMAGE;
-  if (/^https?:\/\//i.test(normalized)) return normalized;
+  if (/^https?:\/\//i.test(normalized)) return FALLBACK_IMAGE;
   if (normalized.startsWith("/uploads/")) return normalized;
   if (normalized.startsWith("uploads/")) return `/${normalized}`;
   if (!normalized.includes("/")) return `/uploads/${normalized}`;
