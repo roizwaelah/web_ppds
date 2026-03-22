@@ -88,9 +88,6 @@ export function AdminLayout() {
     ...(access.canAccessPengumuman
       ? [{ label: "Pengumuman", path: "/admin/pengumuman", icon: Megaphone }]
       : []),
-    ...(access.canAccessKomentar
-      ? [{ label: "Komentar", path: "/admin/komentar", icon: MessageSquare }]
-      : []),
 
     ...(access.canAccessPendaftaran
       ? [
@@ -157,7 +154,7 @@ export function AdminLayout() {
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto py-2 px-2 space-y-0.5">
           {sidebarItems.map((item) => (
-            <div key={item.label}>
+            <div key={item.path || item.key || item.label}>
               {item.children ? (
                 <>
                   <button
