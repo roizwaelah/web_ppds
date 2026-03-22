@@ -240,9 +240,9 @@ export function AdminLayout() {
         <div className="p-2 bg-emerald-950/40 border-t border-emerald-800/50 shrink-0">
           <button
             onClick={() => setConfirmLogout(true)}
-            className="w-full flex items-center justify-center gap-1.5 py-1.5 text-[10px] font-medium text-rose-400 hover:bg-rose-500/15 rounded-lg"
+            className="w-full flex items-center justify-center gap-1.5 py-1.5 text-[14px] font-bold text-yellow-500 hover:bg-white hover:text-rose-600 rounded-lg"
           >
-            <LogOut size={11} /> Logout
+            <LogOut size={16} /> Logout
           </button>
         </div>
       </aside>
