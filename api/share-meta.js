@@ -5,6 +5,8 @@ const SITE_NAME = 'Pondok Pesantren Darussalam Panusupan';
 const SITE_URL = 'https://ppds-panusupan.vercel.app';
 const DEFAULT_DESCRIPTION = 'Website resmi Pondok Pesantren Darussalam Panusupan yang memuat profil pesantren, program pendidikan, pengumuman, pendaftaran, dan artikel santri.';
 const DEFAULT_IMAGE = '/header_ppds.webp';
+const DEFAULT_IMAGE_WIDTH = '1200';
+const DEFAULT_IMAGE_HEIGHT = '630';
 
 function escapeHtml(value = '') {
   return String(value)
@@ -42,12 +44,18 @@ function stripHtml(html = '') {
 function normalizeImage(url) {
   if (!url) return new URL(DEFAULT_IMAGE, SITE_URL).toString();
   const normalized = String(url).trim();
-  if (!normalized) return new URL(DEFAULT_IMAGE, SITE_URL).toString();
-  if (/^https?:\/\//i.test(normalized)) return normalized;
+  if (!normalized || normalized.startsWith('data:')) return new URL(DEFAULT_IMAGE, SITE_URL).toString();
+  if (/^https?:\/\//i.test(normalized)) return normalized.replace(/^http:\/\//i, 'https://');
   if (normalized.startsWith('/')) return new URL(normalized, SITE_URL).toString();
   if (normalized.startsWith('uploads/')) return new URL(`/${normalized}`, SITE_URL).toString();
   if (!normalized.includes('/')) return new URL(`/uploads/${normalized}`, SITE_URL).toString();
   return new URL(DEFAULT_IMAGE, SITE_URL).toString();
+}
+
+function extractContentImage(html = '') {
+  const match = String(html).match(/<img[^>]+src=["']([^"']+)["']/i);
+  if (!match?.[1]) return '';
+  return match[1];
 }
 
 async function fetchJson(url) {
@@ -72,6 +80,7 @@ function readIndexHtml() {
 }
 
 function injectMeta(html, meta) {
+  const imageAlt = meta.imageAlt || meta.title;
   const titleTag = `<title>${escapeHtml(meta.title)}</title>`;
   const metaBlock = `
     <meta name="description" content="${escapeHtml(meta.description)}" />
@@ -84,10 +93,17 @@ function injectMeta(html, meta) {
     <meta property="og:site_name" content="${escapeHtml(SITE_NAME)}" />
     <meta property="og:locale" content="id_ID" />
     <meta property="og:image" content="${escapeHtml(meta.image)}" />
+    <meta property="og:image:url" content="${escapeHtml(meta.image)}" />
+    <meta property="og:image:secure_url" content="${escapeHtml(meta.image)}" />
+    <meta property="og:image:width" content="${escapeHtml(meta.imageWidth || DEFAULT_IMAGE_WIDTH)}" />
+    <meta property="og:image:height" content="${escapeHtml(meta.imageHeight || DEFAULT_IMAGE_HEIGHT)}" />
+    <meta property="og:image:alt" content="${escapeHtml(imageAlt)}" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${escapeHtml(meta.title)}" />
     <meta name="twitter:description" content="${escapeHtml(meta.description)}" />
+    <meta name="twitter:url" content="${escapeHtml(meta.url)}" />
     <meta name="twitter:image" content="${escapeHtml(meta.image)}" />
+    <meta name="twitter:image:alt" content="${escapeHtml(imageAlt)}" />
     <link rel="canonical" href="${escapeHtml(meta.url)}" />`;
 
   return html
@@ -114,7 +130,8 @@ async function resolveMeta(pathname, origin) {
       return {
         title: `${article.title} | ${SITE_NAME}`,
         description,
-        image: normalizeImage(article.image),
+        image: normalizeImage(article.image || extractContentImage(article.content)),
+        imageAlt: article.title,
         url: pageUrl,
         type: 'article',
       };
@@ -132,7 +149,8 @@ async function resolveMeta(pathname, origin) {
       return {
         title: `${item.title} | ${SITE_NAME}`,
         description,
-        image: new URL(DEFAULT_IMAGE, SITE_URL).toString(),
+        image: normalizeImage(extractContentImage(item.content)),
+        imageAlt: item.title,
         url: pageUrl,
         type: 'article',
       };
@@ -143,6 +161,7 @@ async function resolveMeta(pathname, origin) {
     title: SITE_NAME,
     description: DEFAULT_DESCRIPTION,
     image: new URL(DEFAULT_IMAGE, SITE_URL).toString(),
+    imageAlt: SITE_NAME,
     url: pageUrl,
     type: 'website',
   };

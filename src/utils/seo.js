@@ -1,5 +1,11 @@
 import { stripHTML } from './text';
 
+function extractContentImage(html = '') {
+  const match = String(html).match(/<img[^>]+src=["']([^"']+)["']/i);
+  if (!match?.[1] || match[1].startsWith('data:')) return '';
+  return match[1];
+}
+
 const routeSeo = {
   '/': {
     title: 'Beranda',
@@ -76,14 +82,15 @@ export function createArticleSeo(article, pathname) {
   return {
     title: article.title,
     description: description || 'Baca artikel terbaru dari santri Pondok Pesantren Darussalam Panusupan.',
-    image: article.image || '/header_ppds.webp',
+    image: article.image || extractContentImage(article.content) || '/header_ppds.webp',
+    imageAlt: article.title,
     type: 'article',
     structuredData: {
       '@context': 'https://schema.org',
       '@type': 'Article',
       headline: article.title,
       description: description || article.title,
-      image: article.image || '/header_ppds.webp',
+      image: article.image || extractContentImage(article.content) || '/header_ppds.webp',
       author: {
         '@type': 'Person',
         name: article.author || 'Tim Redaksi',
@@ -113,6 +120,8 @@ export function createAnnouncementSeo(item, pathname) {
   return {
     title: item.title,
     description: description || 'Informasi pengumuman resmi Pondok Pesantren Darussalam Panusupan.',
+    image: extractContentImage(item.content) || '/header_ppds.webp',
+    imageAlt: item.title,
     type: 'article',
     structuredData: {
       '@context': 'https://schema.org',
