@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const SITE_NAME = 'Pondok Pesantren Darussalam Panusupan';
-const SITE_URL = 'https://ppds-panusupan.vercel.app';
+const SITE_URL = 'https://darussalamanusupan.net';
 const DEFAULT_DESCRIPTION = 'Website resmi Pondok Pesantren Darussalam Panusupan yang memuat profil pesantren, program pendidikan, pengumuman, pendaftaran, dan artikel santri.';
 const DEFAULT_IMAGE = '/header_ppds.webp';
 const DEFAULT_IMAGE_WIDTH = '1200';
@@ -64,6 +64,34 @@ async function fetchJson(url) {
   return response.json();
 }
 
+
+async function findPagedItem(fetchPage, matcher) {
+  let page = 1;
+  let totalPages = 1;
+
+  while (page <= totalPages) {
+    const response = await fetchPage(page);
+    const items = Array.isArray(response?.data) ? response.data : [];
+    const match = items.find(matcher);
+
+    if (match) {
+      return match;
+    }
+
+    const total = Number(response?.total || 0);
+    const limit = Number(response?.limit || items.length || 1);
+    totalPages = total > 0 ? Math.ceil(total / limit) : (items.length === limit ? page + 1 : page);
+
+    if (items.length < limit) {
+      break;
+    }
+
+    page += 1;
+  }
+
+  return null;
+}
+
 function readIndexHtml() {
   const candidates = [
     path.join(process.cwd(), 'dist', 'index.html'),
@@ -121,9 +149,10 @@ async function resolveMeta(pathname, origin) {
 
   if (pathname.startsWith(articlePrefix)) {
     const slug = decodeURIComponent(pathname.slice(articlePrefix.length)).trim().toLowerCase();
-    const response = await fetchJson(`${origin}/api/pojok_santri.php?page=1&limit=100&status=published`);
-    const items = Array.isArray(response?.data) ? response.data : [];
-    const article = items.find((item) => String(item?.id) === slug || slugifyTitle(item?.title) === slug);
+    const article = await findPagedItem(
+      (page) => fetchJson(`${origin}/api/pojok_santri.php?page=${page}&limit=50&status=published`),
+      (item) => String(item?.id) === slug || slugifyTitle(item?.title) === slug,
+    );
 
     if (article) {
       const description = stripHtml(article.content || '').slice(0, 155) || 'Baca artikel terbaru dari santri Pondok Pesantren Darussalam Panusupan.';
@@ -140,9 +169,10 @@ async function resolveMeta(pathname, origin) {
 
   if (pathname.startsWith(announcementPrefix)) {
     const slug = decodeURIComponent(pathname.slice(announcementPrefix.length)).trim().toLowerCase();
-    const response = await fetchJson(`${origin}/api/pengumuman.php?limit=100`);
-    const items = Array.isArray(response?.data) ? response.data : [];
-    const item = items.find((entry) => String(entry?.id) === slug || slugifyTitle(entry?.title) === slug);
+    const item = await findPagedItem(
+      (page) => fetchJson(`${origin}/api/pengumuman.php?page=${page}&limit=50`),
+      (entry) => String(entry?.id) === slug || slugifyTitle(entry?.title) === slug,
+    );
 
     if (item) {
       const description = stripHtml(item.content || '').slice(0, 155) || 'Informasi pengumuman resmi Pondok Pesantren Darussalam Panusupan.';
