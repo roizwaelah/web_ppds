@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/pojok-santri/:slug",
-      "destination": "/api/share-meta"
+      "destination": "/api/share-meta?path=/pojok-santri/:slug"
     },
     {
       "source": "/pengumuman/:slug",
-      "destination": "/api/share-meta"
+      "destination": "/api/share-meta?path=/pengumuman/:slug"
     }
   ]
 }

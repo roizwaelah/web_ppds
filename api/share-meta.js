@@ -148,12 +148,25 @@ async function resolveMeta(pathname, origin) {
   };
 }
 
+function getRequestPath(req) {
+  const host = req.headers.host || 'ppds-panusupan.vercel.app';
+  const proto = req.headers['x-forwarded-proto'] || 'https';
+  const requestUrl = new URL(req.url || '/', `${proto}://${host}`);
+  const rewrittenPath = requestUrl.searchParams.get('path');
+
+  if (rewrittenPath && rewrittenPath.startsWith('/')) {
+    return rewrittenPath;
+  }
+
+  return requestUrl.pathname;
+}
+
 export default async function handler(req, res) {
   try {
     const host = req.headers.host || 'ppds-panusupan.vercel.app';
     const proto = req.headers['x-forwarded-proto'] || 'https';
     const origin = `${proto}://${host}`;
-    const pathname = (req.url || '/').split('?')[0];
+    const pathname = getRequestPath(req);
     const html = readIndexHtml();
     const meta = await resolveMeta(pathname, origin);
     const output = injectMeta(html, meta);
