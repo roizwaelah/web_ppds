@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Megaphone, Calendar, AlertCircle } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { PublicRichTextRenderer } from './ui/PublicRichTextRenderer';
+import { getPengumumanPath } from '../utils/slugs';
 
 export function Pengumuman() {
   const { pengumuman } = useData();
@@ -26,7 +27,7 @@ export function Pengumuman() {
           {pengumuman.slice(0, 3).map((item) => (
             <Link
               key={item.id}
-              to={`/pengumuman/${item.id}`}
+              to={getPengumumanPath(item)}
               className="bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all hover:-translate-y-1 group flex flex-col"
             >
               <div className={`h-2 ${item.important ? 'bg-red-500' : 'bg-emerald-500'}`} />
