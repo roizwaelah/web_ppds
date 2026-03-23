@@ -203,7 +203,7 @@ export function PendaftaranPage() {
                     pengisian formulir.
                   </p>
                   <a 
-                    href="https://wa.me/6285743487277/?text=Terima%20kasih%20telah%20menghubungi%2C%0AKami%20akan%20segera%20membalas%20pesan%20anda%20%F0%9F%99%8F" 
+                    href="https://wa.me/6285743487277" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="inline-block"
