@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
 const SITE_NAME = 'Pondok Pesantren Darussalam Panusupan';
-const SITE_URL = 'https://ppds-panusupan.vercel.app';
+const SITE_URL = 'https://darussalamanusupan.net';
 const DEFAULT_DESCRIPTION =
   'Website resmi Pondok Pesantren Darussalam Panusupan yang memuat profil pesantren, program pendidikan, pengumuman, pendaftaran, dan artikel santri.';
 const DEFAULT_IMAGE = '/header_ppds.webp';
