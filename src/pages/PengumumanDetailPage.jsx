@@ -5,6 +5,7 @@ import { useData } from '../contexts/DataContext';
 import { ArrowLeft, Calendar, Check, Link2, MessageCircle } from 'lucide-react';
 import { PublicRichTextRenderer } from '../components/ui/PublicRichTextRenderer';
 import { createAnnouncementSeo } from '../utils/seo';
+import { getPreviewImage } from '../utils/contentPreview';
 import { matchesTitleSlug } from '../utils/slugs';
 
 const stripHtml = (html = '') =>
@@ -198,6 +199,7 @@ export function PengumumanDetailPage() {
   const pageUrl = typeof window !== 'undefined' ? window.location.href : `https://ppds.local${location.pathname}`;
   const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`Pengumuman PPDS: ${item.title}\n${pageUrl}`)}`;
   const formattedDate = new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+  const previewImage = getPreviewImage(item.image, seo?.image);
 
   const copyLink = async () => {
     if (typeof navigator === 'undefined' || !navigator.clipboard) return;
@@ -254,6 +256,13 @@ export function PengumumanDetailPage() {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="bg-white rounded-2xl border border-gray-200 p-8 md:p-12">
+          {previewImage !== '/header_ppds.webp' && (
+            <img
+              src={previewImage}
+              alt={item.title}
+              className="mb-8 h-auto w-full rounded-2xl border border-gray-100 object-cover shadow-sm"
+            />
+          )}
           <PublicRichTextRenderer content={item.content} className="prose-lg max-w-none" />
         </div>
       </div>

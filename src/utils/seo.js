@@ -1,10 +1,5 @@
 import { stripHTML } from './text';
-
-function extractContentImage(html = '') {
-  const match = String(html).match(/<img[^>]+src=["']([^"']+)["']/i);
-  if (!match?.[1] || match[1].startsWith('data:')) return '';
-  return match[1];
-}
+import { extractFirstImageSource, getPreviewImage } from './contentPreview';
 
 const routeSeo = {
   '/': {
@@ -82,7 +77,7 @@ export function createArticleSeo(article, pathname) {
   return {
     title: article.title,
     description: description || 'Baca artikel terbaru dari santri Pondok Pesantren Darussalam Panusupan.',
-    image: article.image || extractContentImage(article.content) || '/header_ppds.webp',
+    image: getPreviewImage(article.image, extractFirstImageSource(article.content)),
     imageAlt: article.title,
     type: 'article',
     structuredData: {
@@ -90,7 +85,7 @@ export function createArticleSeo(article, pathname) {
       '@type': 'Article',
       headline: article.title,
       description: description || article.title,
-      image: article.image || extractContentImage(article.content) || '/header_ppds.webp',
+      image: getPreviewImage(article.image, extractFirstImageSource(article.content)),
       author: {
         '@type': 'Person',
         name: article.author || 'Tim Redaksi',
@@ -120,7 +115,7 @@ export function createAnnouncementSeo(item, pathname) {
   return {
     title: item.title,
     description: description || 'Informasi pengumuman resmi Pondok Pesantren Darussalam Panusupan.',
-    image: extractContentImage(item.content) || '/header_ppds.webp',
+    image: getPreviewImage(item.image, extractFirstImageSource(item.content)),
     imageAlt: item.title,
     type: 'article',
     structuredData: {
@@ -128,6 +123,7 @@ export function createAnnouncementSeo(item, pathname) {
       '@type': 'NewsArticle',
       headline: item.title,
       description: description || item.title,
+      image: getPreviewImage(item.image, extractFirstImageSource(item.content)),
       datePublished: item.date,
       mainEntityOfPage: pathname,
       publisher: {

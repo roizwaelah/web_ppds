@@ -6,6 +6,7 @@ import { useData } from '../contexts/DataContext';
 import { PublicRichTextRenderer } from '../components/ui/PublicRichTextRenderer';
 import { stripHTML } from '../utils/text';
 import { createArticleSeo } from '../utils/seo';
+import { getPreviewImage } from '../utils/contentPreview';
 import { createPojokSantriComment, getPojokSantriComments } from '../lib/api';
 import { getPojokSantriPath, matchesTitleSlug } from '../utils/slugs';
 
@@ -195,7 +196,7 @@ export function PojokSantriDetailPage() {
   <body>
     <h1>${article?.title || ''}</h1>
     <div class="meta">${article?.author || 'Tim Redaksi'} • ${formatDate(article?.date || article?.created_at)}</div>
-    ${article?.image ? `<img src="${toSafeImage(article.image)}" alt="${article.title || ''}" />` : ''}
+    ${previewImage && previewImage !== '/header_ppds.webp' ? `<img src="${toSafeImage(previewImage)}" alt="${article.title || ''}" />` : ''}
     <div class="content">${article?.content || ''}</div>
     <script>
       window.addEventListener('load', () => {
@@ -271,6 +272,7 @@ export function PojokSantriDetailPage() {
   }
 
   const seo = createArticleSeo(article, location.pathname);
+  const previewImage = getPreviewImage(article.image, seo?.image);
 
   return (
     <PublicLayout seo={seo}>
@@ -298,7 +300,7 @@ export function PojokSantriDetailPage() {
           <article>
             <div className="rounded-xl overflow-hidden border border-slate-200 bg-white">
               <img
-                src={toSafeImage(article.image)}
+                src={toSafeImage(previewImage)}
                 alt={article.title}
                 onError={(e) => {
                   e.currentTarget.onerror = null;
