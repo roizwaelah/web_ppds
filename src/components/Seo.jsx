@@ -6,6 +6,8 @@ const SITE_URL = 'https://ppds-panusupan.vercel.app';
 const DEFAULT_DESCRIPTION =
   'Website resmi Pondok Pesantren Darussalam Panusupan yang memuat profil pesantren, program pendidikan, pengumuman, pendaftaran, dan artikel santri.';
 const DEFAULT_IMAGE = '/header_ppds.webp';
+const DEFAULT_IMAGE_WIDTH = '1200';
+const DEFAULT_IMAGE_HEIGHT = '630';
 const DEFAULT_KEYWORDS = [
   'pondok pesantren',
   'Darussalam Panusupan',
@@ -44,6 +46,7 @@ export function Seo({
   title,
   description = DEFAULT_DESCRIPTION,
   image = DEFAULT_IMAGE,
+  imageAlt,
   type = 'website',
   keywords = DEFAULT_KEYWORDS,
   structuredData,
@@ -54,6 +57,7 @@ export function Seo({
     const normalizedTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
     const canonicalUrl = new URL(location.pathname + location.search, SITE_URL).toString();
     const imageUrl = new URL(image, SITE_URL).toString();
+    const normalizedImageAlt = imageAlt || normalizedTitle;
 
     document.title = normalizedTitle;
     document.documentElement.lang = 'id';
@@ -69,10 +73,17 @@ export function Seo({
     upsertMeta('meta[property="og:site_name"]', { property: 'og:site_name', content: SITE_NAME });
     upsertMeta('meta[property="og:locale"]', { property: 'og:locale', content: 'id_ID' });
     upsertMeta('meta[property="og:image"]', { property: 'og:image', content: imageUrl });
+    upsertMeta('meta[property="og:image:url"]', { property: 'og:image:url', content: imageUrl });
+    upsertMeta('meta[property="og:image:secure_url"]', { property: 'og:image:secure_url', content: imageUrl });
+    upsertMeta('meta[property="og:image:width"]', { property: 'og:image:width', content: DEFAULT_IMAGE_WIDTH });
+    upsertMeta('meta[property="og:image:height"]', { property: 'og:image:height', content: DEFAULT_IMAGE_HEIGHT });
+    upsertMeta('meta[property="og:image:alt"]', { property: 'og:image:alt', content: normalizedImageAlt });
     upsertMeta('meta[name="twitter:card"]', { name: 'twitter:card', content: 'summary_large_image' });
     upsertMeta('meta[name="twitter:title"]', { name: 'twitter:title', content: normalizedTitle });
     upsertMeta('meta[name="twitter:description"]', { name: 'twitter:description', content: description });
+    upsertMeta('meta[name="twitter:url"]', { name: 'twitter:url', content: canonicalUrl });
     upsertMeta('meta[name="twitter:image"]', { name: 'twitter:image', content: imageUrl });
+    upsertMeta('meta[name="twitter:image:alt"]', { name: 'twitter:image:alt', content: normalizedImageAlt });
     upsertLink('canonical', canonicalUrl);
 
     let schemaTag = document.head.querySelector('script[data-seo="structured-data"]');
@@ -109,7 +120,7 @@ export function Seo({
     };
 
     schemaTag.textContent = JSON.stringify(schemaPayload);
-  }, [description, image, keywords, location.pathname, location.search, structuredData, title, type]);
+  }, [description, image, imageAlt, keywords, location.pathname, location.search, structuredData, title, type]);
 
   return null;
 }
