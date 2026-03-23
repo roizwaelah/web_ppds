@@ -46,6 +46,7 @@ function normalizeImage(url) {
   const normalized = String(url).trim();
   if (!normalized || normalized.startsWith('data:')) return new URL(DEFAULT_IMAGE, SITE_URL).toString();
   if (/^https?:\/\//i.test(normalized)) return normalized.replace(/^http:\/\//i, 'https://');
+  if (normalized.startsWith('//')) return `https:${normalized}`;
   if (normalized.startsWith('/')) return new URL(normalized, SITE_URL).toString();
   if (normalized.startsWith('uploads/')) return new URL(`/${normalized}`, SITE_URL).toString();
   if (!normalized.includes('/')) return new URL(`/uploads/${normalized}`, SITE_URL).toString();
@@ -53,9 +54,13 @@ function normalizeImage(url) {
 }
 
 function extractContentImage(html = '') {
-  const match = String(html).match(/<img[^>]+src=["']([^"']+)["']/i);
-  if (!match?.[1]) return '';
-  return match[1];
+  const imgMatches = String(html).matchAll(/<img[^>]+src=["']([^"']+)["'][^>]*>/gi);
+  for (const match of imgMatches) {
+    const candidate = String(match?.[1] || '').trim();
+    if (!candidate) continue;
+    return candidate;
+  }
+  return '';
 }
 
 async function fetchJson(url) {
@@ -179,7 +184,7 @@ async function resolveMeta(pathname, origin) {
       return {
         title: `${item.title} | ${SITE_NAME}`,
         description,
-        image: normalizeImage(extractContentImage(item.content)),
+        image: normalizeImage(item.image || extractContentImage(item.content)),
         imageAlt: item.title,
         url: pageUrl,
         type: 'article',
