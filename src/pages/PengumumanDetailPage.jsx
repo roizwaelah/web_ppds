@@ -5,6 +5,7 @@ import { useData } from '../contexts/DataContext';
 import { ArrowLeft, Calendar, Check, Link2, MessageCircle } from 'lucide-react';
 import { PublicRichTextRenderer } from '../components/ui/PublicRichTextRenderer';
 import { createAnnouncementSeo } from '../utils/seo';
+import { matchesTitleSlug } from '../utils/slugs';
 
 const stripHtml = (html = '') =>
   html
@@ -165,7 +166,7 @@ const buildPdfBlob = ({ title, date, content }) => {
 };
 
 export function PengumumanDetailPage() {
-  const { id } = useParams();
+  const { slug } = useParams();
   const location = useLocation();
   const { pengumuman } = useData();
   const [copied, setCopied] = useState(false);
@@ -178,7 +179,7 @@ export function PengumumanDetailPage() {
     );
   }
 
-  const item = pengumuman.find((a) => String(a.id) === String(id));
+  const item = pengumuman.find((a) => matchesTitleSlug(a, slug));
 
   if (!item) {
     return (

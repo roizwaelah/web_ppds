@@ -4,6 +4,7 @@ import { PublicLayout } from "../components/PublicLayout"; // Pastikan path bena
 import { useData } from "../contexts/DataContext";
 import { ArrowRight, Calendar, AlertCircle } from "lucide-react";
 import { PublicRichTextRenderer } from "../components/ui/PublicRichTextRenderer";
+import { getPengumumanPath } from "../utils/slugs";
 
 export function PengumumanPage() {
   const { pengumuman, refreshPengumuman } = useData();
@@ -68,7 +69,7 @@ export function PengumumanPage() {
                 {pengumuman.map((item) => (
                   <Link
                     key={item.id}
-                    to={`/pengumuman/${item.id}`}
+                    to={getPengumumanPath(item)}
                     className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all hover:-translate-y-1 group flex flex-col"
                   >
                     <div

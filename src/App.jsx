@@ -81,9 +81,9 @@ export function App() {
               <Route path="/profil/pengasuh" element={<PengasuhPage />} />
               <Route path="/pendidikan" element={<PendidikanPage />} />
               <Route path="/pojok-santri" element={<PojokSantriPage />} />
-              <Route path="/pojok-santri/:id" element={<PojokSantriDetailPage />} />
+              <Route path="/pojok-santri/:slug" element={<PojokSantriDetailPage />} />
               <Route path="/pengumuman" element={<PengumumanPage />} />
-              <Route path="/pengumuman/:id" element={<PengumumanDetailPage />} />
+              <Route path="/pengumuman/:slug" element={<PengumumanDetailPage />} />
               <Route path="/pendaftaran" element={<PendaftaranPage />} />
               
               {/* 1. Update Route Login dengan RequireGuest */}

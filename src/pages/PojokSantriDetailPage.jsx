@@ -7,6 +7,7 @@ import { PublicRichTextRenderer } from '../components/ui/PublicRichTextRenderer'
 import { stripHTML } from '../utils/text';
 import { createArticleSeo } from '../utils/seo';
 import { createPojokSantriComment, getPojokSantriComments } from '../lib/api';
+import { getPojokSantriPath, matchesTitleSlug } from '../utils/slugs';
 
 const FALLBACK_IMAGE = '/images/placeholder.svg';
 
@@ -105,7 +106,7 @@ function CommentCard({ item, level = 0, onReply }) {
 }
 
 export function PojokSantriDetailPage() {
-  const { id } = useParams();
+  const { slug } = useParams();
   const location = useLocation();
   const { pojokSantri } = useData();
   const [copied, setCopied] = useState(false);
@@ -123,13 +124,13 @@ export function PojokSantriDetailPage() {
   }, [pojokSantri]);
 
   const article = useMemo(
-    () => publishedList.find((item) => String(item.id) === String(id)),
-    [publishedList, id]
+    () => publishedList.find((item) => matchesTitleSlug(item, slug)),
+    [publishedList, slug]
   );
 
   const related = useMemo(
-    () => publishedList.filter((item) => String(item.id) !== String(id)).slice(0, 6),
-    [publishedList, id]
+    () => publishedList.filter((item) => !matchesTitleSlug(item, slug)).slice(0, 6),
+    [publishedList, slug]
   );
 
   const totalComments = useMemo(() => countAllComments(comments), [comments]);
@@ -139,11 +140,11 @@ export function PojokSantriDetailPage() {
     let active = true;
 
     const loadComments = async () => {
-      if (!id) return;
+      if (!article?.id) return;
       try {
         setCommentsLoading(true);
         setCommentError('');
-        const response = await getPojokSantriComments({ articleId: id, status: 'approved', limit: 100 });
+        const response = await getPojokSantriComments({ articleId: article.id, status: 'approved', limit: 100 });
         if (!active) return;
         setComments(Array.isArray(response?.data) ? response.data : []);
       } catch (error) {
@@ -158,7 +159,7 @@ export function PojokSantriDetailPage() {
     return () => {
       active = false;
     };
-  }, [id]);
+  }, [article?.id]);
 
   const copyLink = async () => {
     try {
@@ -230,7 +231,7 @@ export function PojokSantriDetailPage() {
     try {
       setSubmittingComment(true);
       await createPojokSantriComment({
-        articleId: Number(id),
+        articleId: Number(article.id),
         parentId: replyTargetId ? Number(replyTargetId) : null,
         name: commentForm.name,
         email: commentForm.email,
@@ -461,7 +462,7 @@ export function PojokSantriDetailPage() {
               </div>
               <div className="divide-y divide-slate-200">
                 {related.map((item) => (
-                  <Link key={item.id} to={`/pojok-santri/${item.id}`} className="block p-4 hover:bg-slate-50 transition-colors">
+                  <Link key={item.id} to={getPojokSantriPath(item)} className="block p-4 hover:bg-slate-50 transition-colors">
                     <p className="text-[11px] uppercase tracking-wider font-semibold text-emerald-700">
                       {item.category || 'Artikel'}
                     </p>

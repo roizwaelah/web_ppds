@@ -1,6 +1,7 @@
 ﻿import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { stripHTML } from '../utils/text';
+import { getPojokSantriPath } from '../utils/slugs';
 
 export function PojokSantri({ articles = [] }) {
   if (articles.length === 0) {
@@ -25,7 +26,7 @@ export function PojokSantri({ articles = [] }) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {articles.slice(0, 6).map((article) => (
-            <Link key={article.id} to={`/pojok-santri/${article.id}`} className="group">
+            <Link key={article.id} to={getPojokSantriPath(article)} className="group">
               <div className="bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 hover:shadow-md transition-shadow h-full flex flex-col">
                 <div className="aspect-video overflow-hidden">
                   {article.image ? (

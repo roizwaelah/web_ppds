@@ -7,6 +7,7 @@ import { Pengumuman } from "../components/Pengumuman";
 import { getArticles } from "../lib/api";
 import { useData } from "../contexts/DataContext";
 import { stripHTML } from "../utils/text";
+import { getPojokSantriPath } from "../utils/slugs";
 
 const FALLBACK_IMAGE = "/images/placeholder.svg";
 
@@ -117,7 +118,7 @@ export function HomePage() {
             <div className="lg:col-span-7">
               {articles[0] ? (
                 <Link
-                  to={`/pojok-santri/${articles[0].id}`}
+                  to={getPojokSantriPath(articles[0])}
                   className="relative block rounded-2xl overflow-hidden min-h-[360px] md:min-h-[470px] group"
                 >
                   <img
@@ -150,7 +151,7 @@ export function HomePage() {
               {articles.slice(1, 5).map((item) => (
                 <Link
                   key={item.id}
-                  to={`/pojok-santri/${item.id}`}
+                  to={getPojokSantriPath(item)}
                   className="flex gap-4 p-3 rounded-xl hover:bg-white/70 transition-colors"
                 >
                   <img

@@ -7,6 +7,7 @@ import { createPojokSantri } from '../lib/api';
 import { useNotification } from '../contexts/NotificationContext';
 import { stripHTML } from '../utils/text';
 import { RichTextEditor } from '../components/ui/RichTextEditor';
+import { getPojokSantriPath } from '../utils/slugs';
 
 const FALLBACK_IMAGE = '/images/placeholder.svg';
 
@@ -278,7 +279,7 @@ export function PojokSantriPage() {
           <main className="lg:col-span-8">
             {featured ? (
               <>
-                <Link to={`/pojok-santri/${featured.id}`} className="group block border border-slate-200 rounded-xl overflow-hidden bg-white">
+                <Link to={getPojokSantriPath(featured)} className="group block border border-slate-200 rounded-xl overflow-hidden bg-white">
                   <img
                     src={toSafeImage(featured.image)}
                     alt={featured.title}
@@ -313,7 +314,7 @@ export function PojokSantriPage() {
                     {pagedItems.map((item) => (
                       <Link
                         key={item.id}
-                        to={`/pojok-santri/${item.id}`}
+                        to={getPojokSantriPath(item)}
                         className="group block border border-slate-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
                       >
                         <img
@@ -397,7 +398,7 @@ export function PojokSantriPage() {
               </div>
               <div className="divide-y divide-slate-200">
                 {popularItems.map((item, idx) => (
-                  <Link key={item.id} to={`/pojok-santri/${item.id}`} className="flex gap-3 p-4 hover:bg-slate-50 transition-colors">
+                  <Link key={item.id} to={getPojokSantriPath(item)} className="flex gap-3 p-4 hover:bg-slate-50 transition-colors">
                     <span className="text-2xl leading-none font-black text-emerald-700 w-7 text-center">{idx + 1}</span>
                     <div>
                       <h4 className="text-sm font-bold text-slate-900 line-clamp-2 hover:text-emerald-700">
