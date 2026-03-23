@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/pojok-santri/:slug",
+      "destination": "/api/share-meta"
+    },
+    {
+      "source": "/pengumuman/:slug",
+      "destination": "/api/share-meta"
+    }
+  ]
+}
