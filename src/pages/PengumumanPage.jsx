@@ -3,8 +3,35 @@ import { useEffect } from "react";
 import { PublicLayout } from "../components/PublicLayout"; // Pastikan path benar
 import { useData } from "../contexts/DataContext";
 import { ArrowRight, Calendar, AlertCircle } from "lucide-react";
-import { PublicRichTextRenderer } from "../components/ui/PublicRichTextRenderer";
 import { getPengumumanPath } from "../utils/slugs";
+
+const stripHtml = (html = "") =>
+  String(html)
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, " ")
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const extractFirstImage = (html = "") => {
+  const content = String(html);
+  const decoded = content.replace(/\\(["'])/g, "$1");
+  const match = decoded.match(/<img[^>]+src=["']([^"']+)["']/i);
+  return match?.[1]?.trim() || "";
+};
+
+const toAbsoluteImage = (src = "") => {
+  if (!src) return "";
+  if (/^https?:\/\//i.test(src)) return src;
+  if (src.startsWith("//")) return `https:${src}`;
+  if (src.startsWith("/")) return src;
+  if (src.startsWith("uploads/")) return `/${src}`;
+  return "";
+};
 
 export function PengumumanPage() {
   const { pengumuman, refreshPengumuman } = useData();
@@ -95,16 +122,27 @@ export function PengumumanPage() {
                       <h3 className="text-lg font-bold text-gray-900 group-hover:text-emerald-700 transition-colors mb-3 line-clamp-2">
                         {item.title}
                       </h3>
-                      {item.content ? (
-                        <PublicRichTextRenderer
-                          content={item.content}
-                          className="text-sm text-gray-500 line-clamp-3 flex-1 [&_p]:my-0 [&_p]:leading-6"
-                        />
-                      ) : (
-                        <p className="text-gray-500 text-sm line-clamp-3 flex-1">
-                          Klik untuk membaca selengkapnya.
-                        </p>
-                      )}
+                      {(() => {
+                        const imageSrc = toAbsoluteImage(extractFirstImage(item.content || ""));
+                        const summary = stripHtml(item.content || "");
+                        return (
+                          <div className="flex-1 min-h-0">
+                            {imageSrc && (
+                              <div className="mb-3 overflow-hidden rounded-lg border border-gray-100 bg-gray-50">
+                                <img
+                                  src={imageSrc}
+                                  alt={item.title}
+                                  className="w-full h-44 object-cover"
+                                  loading="lazy"
+                                />
+                              </div>
+                            )}
+                            <p className="text-gray-500 text-sm leading-6 line-clamp-4">
+                              {summary || "Klik untuk membaca selengkapnya."}
+                            </p>
+                          </div>
+                        );
+                      })()}
                       <div className="mt-4 pt-4 border-t border-gray-100 flex items-center gap-1 text-emerald-600 text-sm font-medium group-hover:gap-2 transition-all">
                         Baca Selengkapnya <ArrowRight size={14} />
                       </div>

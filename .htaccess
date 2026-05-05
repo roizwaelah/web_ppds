@@ -21,6 +21,10 @@ ServerSignature Off
   # Let the PHP API and uploaded files keep their native paths.
   RewriteRule ^(?:api|uploads)(?:/|$) - [L]
 
+  # Dynamic metadata for social link previews on Apache hosting.
+  RewriteRule ^pojok-santri/(.+)$ api/share-meta.php?path=/pojok-santri/$1 [QSA,L]
+  RewriteRule ^pengumuman/(.+)$ api/share-meta.php?path=/pengumuman/$1 [QSA,L]
+
   # Front-controller for Vite SPA routes.
   RewriteRule ^ index.html [L]
 </IfModule>

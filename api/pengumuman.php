@@ -34,7 +34,66 @@ function rateLimit($max = 100, $window = 60)
 
 function sanitizeContent($html)
 {
-    return trim($html); // Frontend sanitize, ini fallback minimal
+    $content = trim((string)$html);
+    if ($content === '') {
+        return '';
+    }
+
+    return materializeInlineContentImages($content);
+}
+
+function materializeInlineContentImages($html)
+{
+    $content = (string)$html;
+    $root = dirname(__DIR__);
+    $relativeDir = '/uploads/pengumuman';
+    $fullDir = $root . $relativeDir;
+
+    if (!is_dir($fullDir)) {
+        @mkdir($fullDir, 0755, true);
+    }
+
+    if (!is_dir($fullDir)) {
+        return $content;
+    }
+
+    return preg_replace_callback(
+        '#src=(["\'])(data:image/([a-zA-Z0-9.+-]+);base64,([^"\']+))\1#i',
+        function ($matches) use ($fullDir, $relativeDir) {
+            $fullData = (string)($matches[2] ?? '');
+            $extRaw = strtolower((string)($matches[3] ?? ''));
+            $base64 = (string)($matches[4] ?? '');
+
+            $extMap = [
+                'jpeg' => 'jpg',
+                'jpg' => 'jpg',
+                'png' => 'png',
+                'gif' => 'gif',
+                'webp' => 'webp',
+            ];
+            $ext = $extMap[$extRaw] ?? 'jpg';
+
+            $binary = base64_decode($base64, true);
+            if ($binary === false || strlen($binary) < 32) {
+                return $matches[0];
+            }
+
+            $hash = sha1($binary);
+            $filename = $hash . '.' . $ext;
+            $targetPath = $fullDir . '/' . $filename;
+            if (!is_file($targetPath)) {
+                @file_put_contents($targetPath, $binary, LOCK_EX);
+            }
+
+            if (!is_file($targetPath)) {
+                return $matches[0];
+            }
+
+            $publicPath = $relativeDir . '/' . $filename;
+            return 'src="' . htmlspecialchars($publicPath, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '"';
+        },
+        $content
+    );
 }
 
 function validateDate($date)
